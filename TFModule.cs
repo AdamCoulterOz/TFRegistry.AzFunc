@@ -9,7 +9,6 @@ using Azure.Identity;
 using System;
 using System.Linq;
 using Azure.Storage.Blobs.Models;
-using MimeMapping;
 using System.Management.Automation;
 using System.IO;
 using System.Text;
@@ -188,7 +187,7 @@ namespace AdamCoulter.Terraform
 			using var stream = request.Body;
 			var header = new BlobHttpHeaders()
 			{
-				ContentType = MimeUtility.GetMimeMapping("module.zip")
+				ContentType = "application/zip"
 			};
 			file.Upload(content: stream, httpHeaders: header);
 			return request.CreateResponse(HttpStatusCode.Created);
