@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using System.Management.Automation;
 using System;
 
-namespace AdamCoulter.Terraform
+namespace PurpleDepot.Model
 {
 	public class Module
 	{

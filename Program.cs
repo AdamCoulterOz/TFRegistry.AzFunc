@@ -9,7 +9,6 @@ namespace TFRegistry.AzFunc
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
                 .Build();
-
             host.Run();
         }
     }

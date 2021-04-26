@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Management.Automation;
 
-namespace AdamCoulter.Terraform
+namespace PurpleDepot.Model
 {
 	public class VersionElement
 	{

@@ -1,4 +1,4 @@
-namespace AdamCoulter.Terraform
+namespace PurpleDepot
 {
 	public static class Configuration
 	{

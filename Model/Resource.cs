@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AdamCoulter.Terraform
+namespace PurpleDepot.Model
 {
 	public class Resource
 	{

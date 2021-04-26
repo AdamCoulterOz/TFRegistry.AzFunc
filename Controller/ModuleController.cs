@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -12,39 +11,19 @@ using Azure.Storage.Blobs.Models;
 using System.Management.Automation;
 using System.IO;
 using System.Text;
+using PurpleDepot.Model;
 
-namespace AdamCoulter.Terraform
+namespace PurpleDepot.Controller
 {
-	public static class TFModule
+	public static class ModuleController
 	{
-		[Function(nameof(ServiceDiscovery))]
-		public static HttpResponseData ServiceDiscovery(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ".well-known/terraform.json")]
-			HttpRequestData request,
-			FunctionContext executionContext)
-		{
-			var logger = executionContext.GetLogger(nameof(ServiceDiscovery));
-			logger.LogInformation($"{nameof(ServiceDiscovery)} invoked");
-
-			var services = new Dictionary<string, string>()
-			{
-				["modules.v1"] = "/v1/modules"
-			};
-
-			var body = JsonSerializer.Serialize(services);
-			var response = request.CreateResponse(HttpStatusCode.OK);
-			response.Headers.Add("Content-Type", "application/json");
-			response.WriteString(body);
-			return response;
-		}
-
 		[Function(nameof(Versions))]
 		public static HttpResponseData Versions(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{owner}/{name}/{provider}/versions")]
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/versions")]
 			HttpRequestData request, FunctionContext executionContext,
-			string owner, string name, string provider)
+			string @namespace, string name, string provider)
 		{
-			if (!Authenticated(request.Headers))
+			if (!AuthController.Authenticated(request.Headers))
 				return request.CreateResponse(HttpStatusCode.Unauthorized);
 
 			var logger = executionContext.GetLogger(nameof(Versions));
@@ -55,9 +34,13 @@ namespace AdamCoulter.Terraform
 
 			doc.Modules.Add(module);
 
+			string name1;
+			if(module.Name is not null)
+				name1 = module.Name;
+
 			var container = ContainerClient;
-			var prefixItems = container.GetBlobsByHierarchy(prefix: GetPrefix(owner, provider, name), delimiter: "/")
-					.Where(i => i.IsPrefix).ToList();
+			var prefixItems = container.GetBlobsByHierarchy(prefix: GetPrefix(@namespace, provider, name), delimiter: "/")
+					.Where(item => item.IsPrefix).ToList();
 			foreach (var item in prefixItems)
 			{
 				var version = SemanticVersion.Parse(item.Prefix);
@@ -73,64 +56,64 @@ namespace AdamCoulter.Terraform
 
 		[Function(nameof(Download))]
 		public static HttpResponseData Download(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{owner}/{name}/{provider}/download")]
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/download")]
 			HttpRequestData request,
-			string owner, string name, string provider)
+			string @namespace, string name, string provider)
 		{
-			if (!Authenticated(request.Headers))
+			if (!AuthController.Authenticated(request.Headers))
 				return request.CreateResponse(HttpStatusCode.Unauthorized);
 
-			var latest = GetLatestVersion(owner, name, provider);
+			var latest = GetLatestVersion(@namespace, name, provider);
 			if (latest is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
-			var file = GetModuleClient(provider, owner, name, latest);
+			var file = GetModuleClient(provider, @namespace, name, latest);
 			if (!file.Exists())
 				throw new Exception("Lost file");
 
 			var response = request.CreateResponse(HttpStatusCode.OK);
 			response.Body = file.OpenRead();
 			response.Headers.Add("Content-Type", "application/zip");
-			response.Headers.Add("Content-Disposition", new string[] { "attachment", $"filename={GetFileName(provider, owner, name, latest)}" });
+			response.Headers.Add("Content-Disposition", new string[] { "attachment", $"filename={GetFileName(provider, @namespace, name, latest)}" });
 			return response;
 		}
 
 		[Function(nameof(DownloadSpecific))]
 		public static HttpResponseData DownloadSpecific(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{owner}/{name}/{provider}/{version}/download")]
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/{version}/download")]
 			HttpRequestData request,
-			string owner, string name, string provider, string version)
+			string @namespace, string name, string provider, string version)
 		{
-			if (!Authenticated(request.Headers))
+			if (!AuthController.Authenticated(request.Headers))
 				return request.CreateResponse(HttpStatusCode.Unauthorized);
 
-			var file = GetModuleClient(provider, owner, name, version);
+			var file = GetModuleClient(provider, @namespace, name, version);
 			if (!file.Exists())
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
 			var response = request.CreateResponse(HttpStatusCode.OK);
 			response.Body = file.OpenRead();
 			response.Headers.Add("Content-Type", "application/zip");
-			response.Headers.Add("Content-Disposition", new string[] { "attachment", $"filename={GetFileName(provider, owner, name, version)}" });
+			response.Headers.Add("Content-Disposition", new string[] { "attachment", $"filename={GetFileName(provider, @namespace, name, version)}" });
 			return response;
 		}
 
 		[Function(nameof(Latest))]
 		public static HttpResponseData Latest(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{owner}/{name}/{provider}")]
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}")]
 			HttpRequestData request,
-			string owner, string name, string provider)
+			string @namespace, string name, string provider)
 		{
-			if (!Authenticated(request.Headers))
+			if (!AuthController.Authenticated(request.Headers))
 				return request.CreateResponse(HttpStatusCode.Unauthorized);
 
-			var latest = GetLatestVersion(owner, name, provider);
+			var latest = GetLatestVersion(@namespace, name, provider);
 			if (latest is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
 			var module = new Module()
 			{
 				Name = name,
-				Namespace = owner,
+				Namespace = @namespace,
 				Provider = provider,
 				Version = SemanticVersion.Parse(latest)
 			};
@@ -145,21 +128,21 @@ namespace AdamCoulter.Terraform
 
 		[Function(nameof(Specific))]
 		public static HttpResponseData Specific(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{owner}/{name}/{provider}/{version}")]
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/{version}")]
 			HttpRequestData request,
-			string owner, string name, string provider, string version)
+			string @namespace, string name, string provider, string version)
 		{
-			if (!Authenticated(request.Headers))
+			if (!AuthController.Authenticated(request.Headers))
 				return request.CreateResponse(HttpStatusCode.Unauthorized);
 
-			var file = GetModuleClient(provider, owner, name, version);
+			var file = GetModuleClient(provider, @namespace, name, version);
 			if(!file.Exists().Value)
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
 			var module = new Module()
 			{
 				Name = name,
-				Namespace = owner,
+				Namespace = @namespace,
 				Provider = provider,
 				Version = SemanticVersion.Parse(version)
 			};
@@ -174,11 +157,11 @@ namespace AdamCoulter.Terraform
 
 		[Function(nameof(Ingest))]
 		public static HttpResponseData Ingest(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/modules/{owner}/{name}/{provider}/{version}/upload")]
+			[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/modules/{namespace}/{name}/{provider}/{version}/upload")]
 			HttpRequestData request,
-			string owner, string name, string provider, string version)
+			string @namespace, string name, string provider, string version)
 		{
-			var file = GetModuleClient(provider, owner, name, version);
+			var file = GetModuleClient(provider, @namespace, name, version);
 			if (file.Exists().Value)
 				return request.CreateResponse(HttpStatusCode.Conflict);
 			var length = request.Headers.GetValues("Content-Length").FirstOrDefault();
@@ -193,12 +176,7 @@ namespace AdamCoulter.Terraform
 			return request.CreateResponse(HttpStatusCode.Created);
 		}
 
-		public static bool Authenticated(HttpHeadersCollection headers)
-		{
-			return true;
-			// TODO: Add actual token verification
-			//return headers.Contains("Authorization");
-		}
+
 
 		private static BlobContainerClient ContainerClient
 		{
@@ -213,33 +191,36 @@ namespace AdamCoulter.Terraform
 			}
 		}
 
-		private static string GetPrefix(string owner, string provider, string name, string? version = null)
+		private static string GetPrefix(string @namespace, string provider, string name, string? version = null)
 		{
-			var prefix = $"{owner}/{provider}/{name}/";
+			var prefix = $"{@namespace}/{provider}/{name}/";
 			if(version is not null)
 				prefix += $"{version}/";
 			return prefix;
 		}
 
-		private static string? GetLatestVersion(string owner, string provider, string name)
+		private static string? GetLatestVersion(string @namespace, string provider, string name)
 		{
-			return ContainerClient.GetBlobsByHierarchy(prefix: GetPrefix(owner, provider, name), delimiter: "/")
+			return ContainerClient.GetBlobsByHierarchy(prefix: GetPrefix(@namespace, provider, name), delimiter: "/")
 					.Where(item => item.IsPrefix).ToList()
 					.OrderBy(item => item.Prefix).LastOrDefault()?.Prefix;
 		}
 
-		private static BlobClient GetModuleClient(string provider, string owner, string name, string version)
+		private static BlobClient GetModuleClient(string provider, string @namespace, string name, string version)
 		{
+			string fileName = GetFileName(provider, @namespace, name, version);
+			string prefix = GetPrefix(@namespace, provider, name, version);
+			
+			string path = $"{prefix}{fileName}";
+
 			var containerClient = ContainerClient;
-			string fileName = GetFileName(provider, owner, name, version);
-			string prefix = GetPrefix(owner, provider, name, version);
-			var blobClient = containerClient.GetBlobClient($"{prefix}{fileName}");
+			var blobClient = containerClient.GetBlobClient(path);
 			return blobClient;
 		}
 
-		private static string GetFileName(string provider, string owner, string name, string version)
+		private static string GetFileName(string provider, string @namespace, string name, string version)
 		{
-			return $"{owner}-{provider}-{name}-{version}.zip";
+			return $"{@namespace}-{provider}-{name}-{version}.zip";
 		}
 	}
 }
