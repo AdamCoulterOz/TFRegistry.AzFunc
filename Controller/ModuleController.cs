@@ -112,7 +112,7 @@ namespace PurpleDepot.Controller
 			module = new Module(@namespace, name, provider, version);
 			
 			using var stream = request.Body;
-			_storageProvider.UploadFile(module.FileKey, stream);
+			await _storageProvider.UploadFile(module.FileKey, stream);
 
 			_moduleContext.Add(module);
 			_moduleContext.SaveChanges();
