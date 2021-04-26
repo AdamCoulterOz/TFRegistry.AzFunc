@@ -7,23 +7,22 @@ namespace PurpleDepot.Model
 {
 	public class Module
 	{
-		[JsonPropertyName("id")]
-		public string? Id { get; set; }
+		private Guid? _fileKey;
+
+		[JsonPropertyName("namespace")]
+		public string Namespace { get; set; }
+
+		[JsonPropertyName("name")]
+		public string Name { get; set; }
+
+		[JsonPropertyName("provider")]
+		public string Provider { get; set; }
+
+		[JsonPropertyName("version")]
+		public string Version { get; set; }
 
 		[JsonPropertyName("owner")]
 		public string? Owner { get; set; }
-
-		[JsonPropertyName("namespace")]
-		public string? Namespace { get; set; }
-
-		[JsonPropertyName("name")]
-		public string? Name { get; set; }
-
-		[JsonPropertyName("version")]
-		public SemanticVersion? Version { get; set; }
-
-		[JsonPropertyName("provider")]
-		public string? Provider { get; set; }
 
 		[JsonPropertyName("description")]
 		public string? Description { get; set; }
@@ -50,7 +49,7 @@ namespace PurpleDepot.Model
 		public List<SubModule> SubModules { get; set; }
 
 		[JsonPropertyName("examples")]
-		public List<Example> Examples {get;set;}
+		public List<Example> Examples { get; set; }
 
 		[JsonPropertyName("providers")]
 		public List<Provider> Providers { get; set; }
@@ -58,12 +57,32 @@ namespace PurpleDepot.Model
 		[JsonPropertyName("versions")]
 		public List<VersionElement> Versions { get; set; }
 
-		public Module()
+		public Guid FileKey
 		{
+			get
+			{
+				if (!_fileKey.HasValue)
+					_fileKey = Guid.NewGuid();
+				return _fileKey.Value;
+			}
+			set
+			{
+				_fileKey = value;
+			}
+		}
+
+		public Module(string @namespace, string name, string provider, string version)
+		{
+			Namespace = @namespace;
+			Name = name;
+			Provider = provider;
+			Version = SemanticVersion.Parse(version).ToString();
 			SubModules = new List<SubModule>();
 			Examples = new List<Example>();
 			Providers = new List<Provider>();
 			Versions = new List<VersionElement>();
 		}
+		public string FileName(string version) => $"{Namespace}-{Provider}-{Name}-{version}.zip";
+		public string[] PrimaryKey => new string[] { Namespace, Name, Provider };
 	}
 }

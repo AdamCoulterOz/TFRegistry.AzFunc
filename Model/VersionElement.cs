@@ -7,15 +7,26 @@ namespace PurpleDepot.Model
 	public class VersionElement
 	{
 		[JsonPropertyName("version")]
-		public SemanticVersion Version { get; set; }
+		public string Version { get; set; }
+
+		public SemanticVersion SemVer
+		{
+			get => new(Version);
+			set => Version = value.ToString();
+		}
 
 		[JsonPropertyName("root")]
 		public Root? Root { get; set; }
-		
+
 		[JsonPropertyName("submodules")]
 		public List<SubModule>? SubModules { get; set; }
 
 		public VersionElement(SemanticVersion version)
+		{
+			Version = version.ToString();
+		}
+
+		public VersionElement(string version)
 		{
 			Version = version;
 		}
