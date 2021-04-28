@@ -62,7 +62,7 @@ namespace PurpleDepot.Controller
 			var module = await _moduleContext.GetModule(@namespace, name, provider, version);
 			if (module is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
-			var downloadStream = _storageProvider.DownloadFile(module.FileKey);
+			var downloadStream = _storageProvider.DownloadZip(module.FileKey);
 			if(downloadStream is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
@@ -112,7 +112,7 @@ namespace PurpleDepot.Controller
 			module = new Module(@namespace, name, provider, version);
 			
 			using var stream = request.Body;
-			await _storageProvider.UploadFile(module.FileKey, stream);
+			await _storageProvider.UploadZip(module.FileKey, stream);
 
 			_moduleContext.Add(module);
 			_moduleContext.SaveChanges();

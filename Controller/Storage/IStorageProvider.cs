@@ -6,7 +6,7 @@ namespace PurpleDepot.Controller.Storage
 {
 	public interface IStorageProvider
 	{
-		public abstract Stream? DownloadFile(Guid fileKey);
-		public abstract Task UploadFile(Guid fileKey, Stream stream);
+		public abstract Stream? DownloadZip(Guid fileKey);
+		public abstract Task UploadZip(Guid fileKey, Stream stream);
 	}
 }

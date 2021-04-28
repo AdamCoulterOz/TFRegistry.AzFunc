@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using PurpleDepot.Controller;
 
 namespace PurpleDepot.Controller.Storage
 {
@@ -18,7 +17,9 @@ namespace PurpleDepot.Controller.Storage
 
 		public AzureStorageService()
 		{
-			EnvironmentVariableAttribute.InitializeAttributes(this);
+			this.InitializeAttributes();
+			if(StorageAccount is null || BlobContainer is null)
+				throw new Exception("Initialization failed");
 		}
 
 		private BlobClient GetBlobClient(Guid fileKey)
@@ -34,13 +35,13 @@ namespace PurpleDepot.Controller.Storage
 			return blobClient;
 		}
 
-		public Stream? DownloadFile(Guid fileKey)
+		public Stream? DownloadZip(Guid fileKey)
 		{
 			var client = GetBlobClient(fileKey);
 			return client.Download().GetRawResponse().ContentStream;
 		}
 
-		public async Task UploadFile(Guid fileKey, Stream stream)
+		public async Task UploadZip(Guid fileKey, Stream stream)
 		{
 			var client = GetBlobClient(fileKey);
 

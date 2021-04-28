@@ -6,13 +6,13 @@ namespace PurpleDepot.Controller.Storage
 {
 	public class MockStorageService : IStorageProvider
 	{
-		public Stream DownloadFile(Guid fileKey)
+		public Stream DownloadZip(Guid fileKey)
 		{
 			var file = "asfhjklasfghjkalsfd";
 			return new MemoryStream(Convert.ToByte(file));
 		}
 
-		public async Task UploadFile(Guid fileKey, Stream stream)
+		public async Task UploadZip(Guid fileKey, Stream stream)
 		{
 			using var sr = new StreamReader(stream);
 			await sr.ReadToEndAsync();
