@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace PurpleDepot.Controller.Storage
+namespace PurpleDepot.Interface.Storage
 {
 	public class MockStorageService : IStorageProvider
 	{

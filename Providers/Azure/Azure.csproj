@@ -27,4 +27,8 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Controller/Controller.csproj" />
+    <ProjectReference Include="../../Interface/Interface.csproj" />
+  </ItemGroup>
 </Project>

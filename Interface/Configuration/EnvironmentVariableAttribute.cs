@@ -1,6 +1,6 @@
 using System;
 
-namespace PurpleDepot.Controller
+namespace PurpleDepot.Interface.Configuration
 {
 	[AttributeUsage(AttributeTargets.Property)]
 	public class EnvironmentVariableAttribute : Attribute

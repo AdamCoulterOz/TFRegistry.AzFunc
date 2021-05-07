@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using PurpleDepot.Interface.Configuration;
+using PurpleDepot.Interface.Storage;
 
-namespace PurpleDepot.Controller.Storage
+namespace PurpleDepot.Providers.Storage.Azure
 {
 	public class AzureStorageService : IStorageProvider
 	{

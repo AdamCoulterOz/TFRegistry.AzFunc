@@ -2,14 +2,14 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PurpleDepot.Controller.Storage;
 using PurpleDepot.Data;
+using PurpleDepot.Interface.Storage;
+using PurpleDepot.Providers.Storage.Azure;
 
-namespace TFRegistry.AzFunc
+namespace PurpleDepot.Providers.Azure
 {
 	public class Program
 	{
-        
         const string ServiceInjection = "SERVICE_INJECTION";
 		public static void Main()
 		{
@@ -32,11 +32,11 @@ namespace TFRegistry.AzFunc
 		static void DevServices(HostBuilderContext _, IServiceCollection services)
 		{
 			services.AddTransient<IStorageProvider, MockStorageService>();
+			services.AddDbContext<ModuleContext>(options => options.UseInMemoryDatabase("PurpleDepot"));
 		}
 
         static void AzureServices(HostBuilderContext _, IServiceCollection services)
 		{
-            
 			services.AddTransient<IStorageProvider, AzureStorageService>();
             services.AddDbContext<ModuleContext>(options => options.UseCosmos(
                     accountEndpoint: "https://testcosmos.documents.azure.com:443/",
