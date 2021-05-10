@@ -10,7 +10,10 @@ namespace PurpleDepot.Providers.Azure
 	public class ModuleAPI : ModuleController
 	{
 		public ModuleAPI(ModuleContext moduleContext, IStorageProvider storageProvider)
-			: base(moduleContext, storageProvider) { }
+			: base(moduleContext, storageProvider) { 
+				moduleContext.Database.EnsureDeleted();
+				moduleContext.Database.EnsureCreated();
+			}
 
 		[Function(nameof(GetVersions))]
 		public async Task<HttpResponseData> GetVersions(

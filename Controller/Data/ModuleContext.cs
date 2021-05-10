@@ -13,22 +13,26 @@ namespace PurpleDepot.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Module>()
-				.HasMany(module => module.Versions);
+
+			
 
 			modelBuilder.Entity<Module>()
-				.HasKey(module => module.PrimaryKey);
+				.HasMany(module => module.Versions)
+				.WithOne(version => version.Module);
+
+			modelBuilder.Entity<Module>()
+				.HasKey(module => new { module.Namespace, module.Name, module.Provider });
+
 		}
 
-		public async Task<Module> GetModule(string @namespace, string name, string provider, string version = "latest")
+		public async Task<Module?> GetModule(string @namespace, string name, string provider, string version = "latest")
 		{
 			return version.Equals("latest") ?
-				await Modules.FindAsync(new string[] { @namespace, name, provider })
-			 :  await Modules.Where(m => m.Namespace == @namespace)
-							 .Where(m => m.Name == name)
-							 .Where(m => m.Provider == provider)
-						  	 .Where(m => m.Versions.Any(ve => ve.Version == version))
-						  	 .SingleAsync();
+				await Modules.FindAsync(new { @namespace, name, provider })
+			 : Modules.Where(m => m.Namespace == @namespace && m.Name == name && m.Provider == provider).FirstOrDefault();
+			 				// .Include(module => module.Versions)
+						  	// .Where(m => m.Versions.Any(ve => ve.Version == version))
+							// .FirstOrDefaultAsync();
 		}
 	}
 }

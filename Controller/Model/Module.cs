@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Management.Automation;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace PurpleDepot.Model
 {
@@ -9,12 +10,15 @@ namespace PurpleDepot.Model
 	{
 		private Guid? _fileKey;
 
+		[Key]
 		[JsonPropertyName("namespace")]
 		public string Namespace { get; set; }
 
+		[Key]
 		[JsonPropertyName("name")]
 		public string Name { get; set; }
 
+		[Key]
 		[JsonPropertyName("provider")]
 		public string Provider { get; set; }
 
@@ -42,18 +46,6 @@ namespace PurpleDepot.Model
 		[JsonPropertyName("verified")]
 		public bool? Verified { get; set; }
 
-		[JsonPropertyName("root")]
-		public Root? Root { get; set; }
-
-		[JsonPropertyName("submodules")]
-		public List<SubModule> SubModules { get; set; }
-
-		[JsonPropertyName("examples")]
-		public List<Example> Examples { get; set; }
-
-		[JsonPropertyName("providers")]
-		public List<Provider> Providers { get; set; }
-
 		[JsonPropertyName("versions")]
 		public List<VersionElement> Versions { get; set; }
 
@@ -77,12 +69,8 @@ namespace PurpleDepot.Model
 			Name = name;
 			Provider = provider;
 			Version = SemanticVersion.Parse(version).ToString();
-			SubModules = new List<SubModule>();
-			Examples = new List<Example>();
-			Providers = new List<Provider>();
 			Versions = new List<VersionElement>();
 		}
 		public string FileName(string version) => $"{Namespace}-{Provider}-{Name}-{version}.zip";
-		public string[] PrimaryKey => new string[] { Namespace, Name, Provider };
 	}
 }

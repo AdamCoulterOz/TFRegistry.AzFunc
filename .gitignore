@@ -264,3 +264,6 @@ __pycache__/
 *.pyc
 .DS_Store
 test/
+.terraform/
+*.tfstate*
+*.tfvars

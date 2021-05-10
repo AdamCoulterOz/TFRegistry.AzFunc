@@ -7,10 +7,10 @@ namespace PurpleDepot.Controller
 	public class HttpResponseException : Exception
 	{
 		public HttpResponseMessage Response { get; init; }
-		public HttpResponseException(HttpStatusCode statusCode, string message = "") 
+		public HttpResponseException(HttpRequestMessage requestMessage, HttpStatusCode statusCode, string message = "") 
 			: base(message: message)
 		{
-			Response = new HttpResponseMessage(statusCode);
+			Response = requestMessage.CreateStringResponse(statusCode, message);
 		}
 
 		public HttpResponseException(HttpResponseMessage Response, string message = "") 

@@ -8,7 +8,9 @@ namespace PurpleDepot.Interface.Configuration
 		public static void InitializeAttributes(this object item)
 		{
 			Type envVarAttribute = typeof(EnvironmentVariableAttribute);
-			foreach (var property in item.GetType().GetProperties())
+			var initType = item.GetType().GetTypeInfo();
+			var properties = initType.DeclaredProperties;
+			foreach (var property in properties)
 			{
 				if (property.GetCustomAttribute(envVarAttribute, false) is not EnvironmentVariableAttribute envVar)
 					continue;

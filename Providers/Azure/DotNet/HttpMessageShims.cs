@@ -13,12 +13,21 @@ namespace PurpleDepot.Providers.Azure
 			{
 				Content = new StreamContent(request.Body)
 			};
-			request.Headers.ToList().ForEach(header => newMessage.Headers.Add(header.Key, header.Value));
+			var nonContentHeaders = request.Headers.ToList().Where(header => !header.Key.Contains("Content"));
+			foreach (var nonContentheader in nonContentHeaders)
+			{
+				newMessage.Headers.Add(nonContentheader.Key, nonContentheader.Value);
+			}
+			var contentHeaders = request.Headers.ToList().Where(header => header.Key.Contains("Content"));
+			foreach (var contentHeader in contentHeaders)
+			{
+				newMessage.Content.Headers.Add(contentHeader.Key, contentHeader.Value);
+			}
 			return newMessage;
 		}
 
 		public static HttpResponseData AsResponseData(this HttpResponseMessage response, HttpRequestData request)
-		{	
+		{
 			var newData = request.CreateResponse(response.StatusCode);
 			newData.Body = response.Content.ReadAsStream();
 			newData.Headers = new HttpHeadersCollection(response.Headers.ToList());

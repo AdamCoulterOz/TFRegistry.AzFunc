@@ -91,6 +91,7 @@ namespace PurpleDepot.Controller
 				return request.CreateStringResponse(HttpStatusCode.BadRequest, $"'{HeaderNames.ContentLength}' is zero or not set");
 
 			module = new Module(@namespace, name, provider, version);
+			module.Versions.Add(new VersionElement(){Version = version, Module = module});
 
 			using var stream = await request.Content.ReadAsStreamAsync();
 			await _storageProvider.UploadZip(module.FileKey, stream);

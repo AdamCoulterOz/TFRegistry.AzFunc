@@ -20,8 +20,6 @@ namespace PurpleDepot.Providers.Storage.Azure
 		public AzureStorageService()
 		{
 			this.InitializeAttributes();
-			if(StorageAccount is null || BlobContainer is null)
-				throw new Exception("Initialization failed");
 		}
 
 		private BlobClient GetBlobClient(Guid fileKey)

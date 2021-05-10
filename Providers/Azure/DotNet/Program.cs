@@ -10,17 +10,17 @@ namespace PurpleDepot.Providers.Azure
 {
 	public class Program
 	{
-        const string ServiceInjection = "SERVICE_INJECTION";
+		const string ServiceInjection = "SERVICE_INJECTION";
 		public static void Main()
 		{
-            var service = Environment.GetEnvironmentVariable(ServiceInjection);
-            Action<HostBuilderContext, IServiceCollection> delegateServices = service switch
-            {
-                "Azure" => AzureServices,
-                "Dev" => DevServices,
-                null => DevServices,
-                _ => throw new ArgumentException($"Invalid {ServiceInjection} value {service}.", paramName: ServiceInjection)                
-            };
+			var service = Environment.GetEnvironmentVariable(ServiceInjection);
+			Action<HostBuilderContext, IServiceCollection> delegateServices = service switch
+			{
+				"Azure" => AzureServices,
+				"Dev" => DevServices,
+				null => DevServices,
+				_ => throw new ArgumentException($"Invalid {ServiceInjection} value {service}.", paramName: ServiceInjection)
+			};
 
 			var host = new HostBuilder()
 				.ConfigureFunctionsWorkerDefaults()
@@ -35,13 +35,13 @@ namespace PurpleDepot.Providers.Azure
 			services.AddDbContext<ModuleContext>(options => options.UseInMemoryDatabase("PurpleDepot"));
 		}
 
-        static void AzureServices(HostBuilderContext _, IServiceCollection services)
+		static void AzureServices(HostBuilderContext _, IServiceCollection services)
 		{
 			services.AddTransient<IStorageProvider, AzureStorageService>();
-            services.AddDbContext<ModuleContext>(options => options.UseCosmos(
-                    accountEndpoint: "https://testcosmos.documents.azure.com:443/",
-                    accountKey: "SuperSecretKey", databaseName: "dbName")
-                );
+			services.AddDbContext<ModuleContext>(options => options.UseCosmos(
+				connectionString: Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING"),
+				databaseName: "PurpleDepot"
+			));
 		}
 	}
 }
