@@ -1,6 +1,7 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using System.Threading.Tasks;
 using PurpleDepot.Controller;
 using PurpleDepot.Data;
 using PurpleDepot.Interface.Storage;
@@ -12,11 +13,25 @@ namespace PurpleDepot.Providers.Azure
 		public ModuleAPI(ModuleContext moduleContext, IStorageProvider storageProvider)
 			: base(moduleContext, storageProvider) { }
 
+		[Function(nameof(GetDownloadModuleAsync))]
+		public async Task<HttpResponseData> GetDownloadModuleAsync(
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "download/{fileKey}/{fileName}")]
+			HttpRequestData request, string fileKey, string fileName)
+		{
+			try
+			{
+				return (await DownloadModuleAsync(request.AsRequestMessage(), new Guid(fileKey), fileName)).AsResponseData(request);
+			}
+			catch (HttpResponseException re)
+			{
+				return re.Response.AsResponseData(request);
+			}
+		}
+
 		[Function(nameof(GetVersions))]
 		public HttpResponseData GetVersions(
 			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/versions")]
-			HttpRequestData request,
-			string @namespace, string name, string provider)
+			HttpRequestData request, string @namespace, string name, string provider)
 		{
 			try
 			{
@@ -28,15 +43,14 @@ namespace PurpleDepot.Providers.Azure
 			}
 		}
 
-		[Function(nameof(GetDownloadAsync))]
-		public async Task<HttpResponseData> GetDownloadAsync(
+		[Function(nameof(GetDownload))]
+		public HttpResponseData GetDownload(
 			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/download")]
-			HttpRequestData request,
-			string @namespace, string name, string provider)
+			HttpRequestData request, string @namespace, string name, string provider)
 		{
 			try
 			{
-				return (await DownloadAsync(request.AsRequestMessage(), @namespace, name, provider)).AsResponseData(request);
+				return Download(request.AsRequestMessage(), @namespace, name, provider, request.BaseUrl()).AsResponseData(request);
 			}
 			catch (HttpResponseException re)
 			{
@@ -44,15 +58,15 @@ namespace PurpleDepot.Providers.Azure
 			}
 		}
 
-		[Function(nameof(GetDownloadSpecificAsync))]
-		public async Task<HttpResponseData> GetDownloadSpecificAsync(
+		[Function(nameof(GetDownloadSpecific))]
+		public HttpResponseData GetDownloadSpecific(
 			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/{version}/download")]
 			HttpRequestData request,
 			string @namespace, string name, string provider, string version)
 		{
 			try
 			{
-				return (await DownloadSpecificAsync(request.AsRequestMessage(), @namespace, name, provider, version)).AsResponseData(request);
+				return DownloadSpecific(request.AsRequestMessage(), @namespace, name, provider, version, request.BaseUrl()).AsResponseData(request);
 			}
 			catch (HttpResponseException re)
 			{
@@ -84,7 +98,7 @@ namespace PurpleDepot.Providers.Azure
 		{
 			try
 			{
-				if(version == "versions")
+				if (version == "versions")
 					return GetVersions(request, @namespace, name, provider);
 				return Specific(request.AsRequestMessage(), @namespace, name, provider, version).AsResponseData(request);
 			}

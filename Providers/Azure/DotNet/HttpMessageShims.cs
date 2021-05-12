@@ -1,5 +1,6 @@
-using System.Net.Http;
+using System;
 using System.Linq;
+using System.Net.Http;
 using Microsoft.Azure.Functions.Worker.Http;
 
 namespace PurpleDepot.Providers.Azure
@@ -33,6 +34,16 @@ namespace PurpleDepot.Providers.Azure
 			headers.AddRange(response.Content.Headers.ToList());
 			newData.Headers = new HttpHeadersCollection(headers);
 			return newData;
+		}
+
+		public static Uri BaseUrl(this HttpRequestData request)
+		{
+			return new UriBuilder
+			{
+				Scheme = request.Url.Scheme,
+				Host = request.Url.Host,
+				Port = request.Url.Port
+			}.Uri;
 		}
 	}
 }

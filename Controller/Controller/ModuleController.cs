@@ -5,6 +5,7 @@ using PurpleDepot.Data;
 using PurpleDepot.Model;
 using PurpleDepot.Interface.Storage;
 using Microsoft.Net.Http.Headers;
+using System;
 
 namespace PurpleDepot.Controller
 {
@@ -17,6 +18,14 @@ namespace PurpleDepot.Controller
 			_moduleContext = moduleContext;
 			_storageProvider = storageProvider;
 			_moduleContext.Database.EnsureCreated();
+		}
+
+		public async Task<HttpResponseMessage> DownloadModuleAsync(HttpRequestMessage request, Guid fileKey, string fileName)
+		{
+			var (blobDownloadStream, blobContentLength) = await _storageProvider.DownloadZipAsync(fileKey);
+			if (blobDownloadStream is null)
+				return request.CreateStringResponse(HttpStatusCode.NotFound, "Cannot find module zip.");
+			return request.CreateZipDownloadResponse(blobDownloadStream, fileName, blobContentLength);
 		}
 
 		public HttpResponseMessage Versions(
@@ -34,28 +43,31 @@ namespace PurpleDepot.Controller
 			return request.CreateJsonResponse(moduleCollection);
 		}
 
-		public async Task<HttpResponseMessage> DownloadAsync(
-			HttpRequestMessage request, string @namespace, string name, string provider)
+		public HttpResponseMessage Download(
+			HttpRequestMessage request, string @namespace, string name, string provider, Uri baseUri)
 		{
-			return await DownloadSpecificAsync(request, @namespace, name, provider, "latest");
+			return DownloadSpecific(request, @namespace, name, provider, "latest", baseUri);
 		}
 
-		public async Task<HttpResponseMessage> DownloadSpecificAsync(
-			HttpRequestMessage request, string @namespace, string name, string provider, string version)
+		public HttpResponseMessage DownloadSpecific(
+			HttpRequestMessage request, string @namespace, string name, string provider, string version, Uri baseUri)
 		{
 			request.Authenticate();
 			var module = _moduleContext.GetModule(@namespace, name, provider);
 			if (module is null)
 				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module doesn't exist at any version.");
-			if(!module.HasVersion(version))
+			if (!module.HasVersion(version))
 				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module found, but specified version doesn't exist.");
 			var fileKey = module.FileId(version);
-			if(fileKey is null)
+			if (fileKey is null)
 				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "Couldn't get file key.");
-			var (blobDownloadStream, blobContentLength) = await _storageProvider.DownloadZipAsync(fileKey.Value);
-			if (blobDownloadStream is null)
-				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module found at required version, but cannot find module zip.");
-			return request.CreateZipDownloadResponse(blobDownloadStream, module.FileName(version), blobContentLength);
+			var response = request.CreateResponse(HttpStatusCode.NoContent);
+
+			var uriBuilder = new UriBuilder(baseUri);
+			uriBuilder.Path += $"download/{fileKey.Value}/{module.FileName(version)}";
+
+			response.Headers.Add("X-Terraform-Get", uriBuilder.ToString());
+			return response;
 		}
 
 		public HttpResponseMessage Latest(
