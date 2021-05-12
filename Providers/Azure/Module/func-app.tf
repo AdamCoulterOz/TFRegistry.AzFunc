@@ -38,6 +38,7 @@ resource "azurerm_function_app" "app" {
     STORAGE_ACCOUNT          = azurerm_storage_account.module_repo.name
     BLOB_CONTAINER           = azurerm_storage_container.module_repo.name
     COSMOS_CONNECTION_STRING = azurerm_cosmosdb_account.db.connection_strings[0]
+    SERVICE_INJECTION        = "Azure"
   }
 
   site_config {
