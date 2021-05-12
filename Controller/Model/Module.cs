@@ -1,29 +1,26 @@
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using System.Management.Automation;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Management.Automation;
+using System.Text.Json.Serialization;
+using System.Linq;
 
 namespace PurpleDepot.Model
 {
 	public class Module
 	{
-		private Guid? _fileKey;
-
 		[Key]
+		[JsonPropertyName("id")]
+		public Guid Id { get; set; }
+
 		[JsonPropertyName("namespace")]
 		public string Namespace { get; set; }
 
-		[Key]
 		[JsonPropertyName("name")]
 		public string Name { get; set; }
 
-		[Key]
 		[JsonPropertyName("provider")]
 		public string Provider { get; set; }
-
-		[JsonPropertyName("version")]
-		public string Version { get; set; }
 
 		[JsonPropertyName("owner")]
 		public string? Owner { get; set; }
@@ -31,46 +28,94 @@ namespace PurpleDepot.Model
 		[JsonPropertyName("description")]
 		public string? Description { get; set; }
 
-		[JsonPropertyName("source")]
-		public Uri? Source { get; set; }
-
-		[JsonPropertyName("tag")]
-		public string? Tag { get; set; }
-
 		[JsonPropertyName("published_at")]
 		public DateTime PublishedAt { get; set; }
 
 		[JsonPropertyName("downloads")]
 		public int? Downloads { get; set; }
 
-		[JsonPropertyName("verified")]
-		public bool? Verified { get; set; }
-
 		[JsonPropertyName("versions")]
-		public List<VersionElement> Versions { get; set; }
+		public List<ModuleVersion> Versions { get; set; }
 
-		public Guid FileKey
+		public ModuleVersion? Version()
 		{
-			get
-			{
-				if (!_fileKey.HasValue)
-					_fileKey = Guid.NewGuid();
-				return _fileKey.Value;
-			}
-			set
-			{
-				_fileKey = value;
-			}
+			if (Versions.Count == 0)
+				return null;
+			var semVers = new List<SemanticVersion>();
+			foreach (var version in Versions)
+				semVers.Add(version.GetSemVer());
+			semVers.Sort();
+			var latestVersion = semVers.Last().ToString();
+			return Version(latestVersion);
 		}
 
-		public Module(string @namespace, string name, string provider, string version)
+		public ModuleVersion? Version(string version)
 		{
+			var versions = VersionsIndex();
+			if (versions.ContainsKey(version))
+				return versions[version];
+			return null;
+		}
+
+		private Dictionary<string, ModuleVersion> VersionsIndex()
+		{
+			var versions = new Dictionary<string, ModuleVersion>();
+			foreach (var v in Versions)
+				versions.Add(v.Version, v);
+			return versions;
+		}
+
+		public bool HasVersion(string version)
+		{
+			if(Versions.Count == 0) return false;
+			if(version == "latest") return true;
+			var versions = VersionsIndex();
+			return versions.ContainsKey(version);
+		}
+
+		public Module(Guid Id, string Namespace, string Name, string Provider, DateTime PublishedAt)
+		{
+			this.Id = Id;
+			this.Namespace = Namespace;
+			this.Name = Name;
+			this.Provider = Provider;
+			this.PublishedAt = PublishedAt;
+			this.Versions = new List<ModuleVersion>();
+		}
+
+		public Module(string @namespace, string name, string provider)
+		{
+			Id = Guid.NewGuid();
+			PublishedAt = DateTime.Now;
 			Namespace = @namespace;
 			Name = name;
 			Provider = provider;
-			Version = SemanticVersion.Parse(version).ToString();
-			Versions = new List<VersionElement>();
+			Versions = new List<ModuleVersion>();
 		}
-		public string FileName(string version) => $"{Namespace}-{Provider}-{Name}-{version}.zip";
+		public Guid? FileId(string version)
+		{
+			return ResolveVersion(version)?.Id;
+		}
+		public string FileName(string version) {
+			var versionResolved = ResolveVersion(version);
+			if(versionResolved is null)
+				throw new Exception("Couldn't resolve version of module.");
+			return $"{Namespace}-{Provider}-{Name}-{versionResolved.Version}.zip";
+		}
+
+		public ModuleVersion? ResolveVersion(string version)
+		{
+			return version switch {
+				"latest" => Version(),
+				_ => Version(version)
+			};
+		}
+
+		internal void AddVersion(string version)
+		{
+			if (Version(version) is not null)
+				throw new Exception("Version already exists.");
+			Versions.Add(new ModuleVersion(version));
+		}
 	}
 }

@@ -29,14 +29,15 @@ namespace PurpleDepot.Controller
 				Content = JsonContent.Create(document)
 			};
 		}
-		public static HttpResponseMessage CreateZipDownloadResponse(this HttpRequestMessage request, Stream downloadStream, string fileName)
+		public static HttpResponseMessage CreateZipDownloadResponse(this HttpRequestMessage request, Stream downloadStream, string fileName, long? contentLength)
 		{
-			return request.CreateDownloadResponse(downloadStream, fileName, new MediaTypeHeaderValue("application/zip"));
+			return request.CreateDownloadResponse(downloadStream, fileName, new MediaTypeHeaderValue("application/zip"), contentLength);
 		}
-		public static HttpResponseMessage CreateDownloadResponse(this HttpRequestMessage request, Stream downloadStream, string fileName, MediaTypeHeaderValue mediaType)
+		public static HttpResponseMessage CreateDownloadResponse(this HttpRequestMessage request, Stream downloadStream, string fileName, MediaTypeHeaderValue mediaType, long? contentLength)
 		{
 			var response = request.CreateResponse(HttpStatusCode.OK);
 			response.Content = new StreamContent(downloadStream);
+			response.Content.Headers.ContentLength = contentLength;
 			response.Content.Headers.ContentType = mediaType;
 			response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
 			{

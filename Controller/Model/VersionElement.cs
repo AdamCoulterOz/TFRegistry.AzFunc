@@ -1,16 +1,24 @@
-using System.ComponentModel.DataAnnotations;
+using System;
+using System.Management.Automation;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace PurpleDepot.Model
 {
-	public class VersionElement
+	[Owned]
+	public class ModuleVersion
 	{
-		[Key]
+		[JsonPropertyName("id")]
+		public Guid Id { get; set; }
+		
 		[JsonPropertyName("version")]
 		public string Version { get; set; }
+		public SemanticVersion GetSemVer() => new(Version);
 
-		[Key]
-		[JsonIgnore]
-		public Module Module { get; set; }
+		public ModuleVersion(string version)
+		{
+			Version = version;
+			Id = Guid.NewGuid();
+		}
 	}
 }

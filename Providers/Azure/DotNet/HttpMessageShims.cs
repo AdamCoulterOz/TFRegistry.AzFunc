@@ -1,4 +1,3 @@
-using System;
 using System.Net.Http;
 using System.Linq;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -30,7 +29,9 @@ namespace PurpleDepot.Providers.Azure
 		{
 			var newData = request.CreateResponse(response.StatusCode);
 			newData.Body = response.Content.ReadAsStream();
-			newData.Headers = new HttpHeadersCollection(response.Headers.ToList());
+			var headers = response.Headers.ToList();
+			headers.AddRange(response.Content.Headers.ToList());
+			newData.Headers = new HttpHeadersCollection(headers);
 			return newData;
 		}
 	}

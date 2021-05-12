@@ -20,6 +20,8 @@ namespace PurpleDepot.Providers.Storage.Azure
 		public AzureStorageService()
 		{
 			this.InitializeAttributes();
+			if (StorageAccount is null || BlobContainer is null)
+				throw new Exception("Environment variables for Azure Storage not set correctly.");
 		}
 
 		private BlobClient GetBlobClient(Guid fileKey)
@@ -35,21 +37,24 @@ namespace PurpleDepot.Providers.Storage.Azure
 			return blobClient;
 		}
 
-		public Stream? DownloadZip(Guid fileKey)
+		public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey)
 		{
 			var client = GetBlobClient(fileKey);
-			return client.Download().GetRawResponse().ContentStream;
+			var exists = await client.ExistsAsync();
+			if(!exists) return (null, null);
+			BlobDownloadInfo download = await client.DownloadAsync();
+			return (download.Content, download.ContentLength);
 		}
 
-		public async Task UploadZip(Guid fileKey, Stream stream)
+		public async Task UploadZipAsync(Guid fileKey, Stream stream)
 		{
 			var client = GetBlobClient(fileKey);
-
 			var header = new BlobHttpHeaders()
 			{
 				ContentType = "application/zip"
 			};
 			await client.UploadAsync(content: stream, httpHeaders: header);
+			stream.Close();
 		}
 	}
 }

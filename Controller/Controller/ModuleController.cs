@@ -16,15 +16,16 @@ namespace PurpleDepot.Controller
 		{
 			_moduleContext = moduleContext;
 			_storageProvider = storageProvider;
+			_moduleContext.Database.EnsureCreated();
 		}
 
-		public async Task<HttpResponseMessage> Versions(
+		public HttpResponseMessage Versions(
 			HttpRequestMessage request,
 			string @namespace, string name, string provider)
 		{
 			request.Authenticate();
 
-			var module = await _moduleContext.GetModule(@namespace, name, provider);
+			var module = _moduleContext.GetModule(@namespace, name, provider);
 			if (module is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
@@ -33,43 +34,48 @@ namespace PurpleDepot.Controller
 			return request.CreateJsonResponse(moduleCollection);
 		}
 
-		public async Task<HttpResponseMessage> Download(
+		public async Task<HttpResponseMessage> DownloadAsync(
 			HttpRequestMessage request, string @namespace, string name, string provider)
 		{
-			request.Authenticate();
-			return await DownloadSpecific(request, @namespace, name, provider, "latest");
+			return await DownloadSpecificAsync(request, @namespace, name, provider, "latest");
 		}
 
-		public async Task<HttpResponseMessage> DownloadSpecific(
+		public async Task<HttpResponseMessage> DownloadSpecificAsync(
 			HttpRequestMessage request, string @namespace, string name, string provider, string version)
 		{
 			request.Authenticate();
-
-			var module = await _moduleContext.GetModule(@namespace, name, provider, version);
+			var module = _moduleContext.GetModule(@namespace, name, provider);
 			if (module is null)
-				return request.CreateResponse(HttpStatusCode.NotFound);
-			var downloadStream = _storageProvider.DownloadZip(module.FileKey);
-			if (downloadStream is null)
-				return request.CreateResponse(HttpStatusCode.NotFound);
-			return request.CreateZipDownloadResponse(downloadStream, module.FileName(version));
+				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module doesn't exist at any version.");
+			if(!module.HasVersion(version))
+				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module found, but specified version doesn't exist.");
+			var fileKey = module.FileId(version);
+			if(fileKey is null)
+				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "Couldn't get file key.");
+			var (blobDownloadStream, blobContentLength) = await _storageProvider.DownloadZipAsync(fileKey.Value);
+			if (blobDownloadStream is null)
+				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module found at required version, but cannot find module zip.");
+			return request.CreateZipDownloadResponse(blobDownloadStream, module.FileName(version), blobContentLength);
 		}
 
-		public async Task<HttpResponseMessage> Latest(
+		public HttpResponseMessage Latest(
 			HttpRequestMessage request,
 			string @namespace, string name, string provider)
 		{
 			request.Authenticate();
-			return await Specific(request, @namespace, name, provider, "latest");
+			return Specific(request, @namespace, name, provider, "latest");
 		}
 
-		public async Task<HttpResponseMessage> Specific(
+		public HttpResponseMessage Specific(
 			HttpRequestMessage request,
 			string @namespace, string name, string provider, string version)
 		{
 			request.Authenticate();
-			var module = await _moduleContext.GetModule(@namespace, name, provider, version);
+			var module = _moduleContext.GetModule(@namespace, name, provider);
 			if (module is null)
-				return request.CreateResponse(HttpStatusCode.NotFound);
+				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module doesn't exist at any version.");
+			if (!module.HasVersion(version))
+				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module doesn't exist at specified version.");
 			return request.CreateJsonResponse(module);
 		}
 
@@ -82,21 +88,29 @@ namespace PurpleDepot.Controller
 			if (request.Content is null)
 				return request.CreateResponse(HttpStatusCode.BadRequest);
 
-			var module = await _moduleContext.GetModule(@namespace, name, provider, version);
-			if (module is not null)
+			var module = _moduleContext.GetModule(@namespace, name, provider);
+			var hasVersion = module?.HasVersion(version);
+
+			if (module is not null && hasVersion is not null && hasVersion.Value)
 				return request.CreateStringResponse(HttpStatusCode.Conflict, "Module already exists with the same name and version");
 
 			var length = request.Content.Headers.ContentLength;
 			if (length is null || length.Equals(0))
 				return request.CreateStringResponse(HttpStatusCode.BadRequest, $"'{HeaderNames.ContentLength}' is zero or not set");
 
-			module = new Module(@namespace, name, provider, version);
-			module.Versions.Add(new VersionElement(){Version = version, Module = module});
+			if(module is null)
+			{
+				module = new Module(@namespace, name, provider);
+				_moduleContext.Add(module);
+			}
+			module.AddVersion(version);
 
-			using var stream = await request.Content.ReadAsStreamAsync();
-			await _storageProvider.UploadZip(module.FileKey, stream);
+			var stream = await request.Content.ReadAsStreamAsync();
+			var fileKey = module.FileId(version);
+			if(fileKey is null)
+				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "There was an issue trying to create the new version.");
+			await _storageProvider.UploadZipAsync(fileKey.Value, stream);
 
-			_moduleContext.Add(module);
 			_moduleContext.SaveChanges();
 
 			return request.CreateResponse(HttpStatusCode.Created);
