@@ -26,7 +26,7 @@ namespace PurpleDepot.Controller
 			var token = tokenHandler.ReadJwtToken(rawToken);
 			var roles = token.Claims.Where(claim => claim.Type == "roles").First().Value;
 
-			if(roles.Contains("Terraform.Module.Contributor"))
+			if(!roles.Contains("Terraform.Module.Contributor"))
 				throw new HttpResponseException(request, HttpStatusCode.Unauthorized, $"The token doesn't doesn't contain the module contributor role, found roles: {roles}");
 		}
 	}
