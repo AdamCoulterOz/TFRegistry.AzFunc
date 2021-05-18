@@ -41,12 +41,12 @@ namespace PurpleDepot.Providers.Storage.Azure
 		{
 			var client = GetBlobClient(fileKey);
 			var exists = await client.ExistsAsync();
-			if(!exists) return (null, null);
+			if (!exists) return (null, null);
 			BlobDownloadInfo download = await client.DownloadAsync();
 			return (download.Content, download.ContentLength);
 		}
 
-		public async Task UploadZipAsync(Guid fileKey, Stream stream)
+		public async Task<bool> UploadZipAsync(Guid fileKey, Stream stream)
 		{
 			var client = GetBlobClient(fileKey);
 			var header = new BlobHttpHeaders()
@@ -55,6 +55,17 @@ namespace PurpleDepot.Providers.Storage.Azure
 			};
 			await client.UploadAsync(content: stream, httpHeaders: header);
 			stream.Close();
+
+			BlobProperties properties = await client.GetPropertiesAsync();
+			if (properties.ContentLength >= 0L)
+			{
+				return true;
+			}
+			else
+			{
+				await client.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots);
+				return false;
+			}
 		}
 	}
 }

@@ -107,10 +107,10 @@ namespace PurpleDepot.Controller
 				return request.CreateStringResponse(HttpStatusCode.Conflict, "Module already exists with the same name and version");
 
 			var length = request.Content.Headers.ContentLength;
-			if (length is null || length.Equals(0))
+			if (length is null || length.Equals(0L))
 				return request.CreateStringResponse(HttpStatusCode.BadRequest, $"'{HeaderNames.ContentLength}' is zero or not set");
 
-			if(module is null)
+			if (module is null)
 			{
 				module = new Module(@namespace, name, provider);
 				_moduleContext.Add(module);
@@ -119,13 +119,20 @@ namespace PurpleDepot.Controller
 
 			var stream = await request.Content.ReadAsStreamAsync();
 			var fileKey = module.FileId(version);
-			if(fileKey is null)
+			if (fileKey is null)
 				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "There was an issue trying to create the new version.");
-			await _storageProvider.UploadZipAsync(fileKey.Value, stream);
 
-			_moduleContext.SaveChanges();
+			bool hadContent = await _storageProvider.UploadZipAsync(fileKey.Value, stream);
 
-			return request.CreateResponse(HttpStatusCode.Created);
+			if (hadContent)
+			{
+				_moduleContext.SaveChanges();
+				return request.CreateResponse(HttpStatusCode.Created);
+			}
+			else
+			{
+				return request.CreateStringResponse(HttpStatusCode.BadRequest, "Uploaded file had zero bytes, and the module was not saved.");
+			}
 		}
 	}
 }

@@ -18,10 +18,11 @@ namespace PurpleDepot.Interface.Storage
 			});
 		}
 
-		public async Task UploadZipAsync(Guid fileKey, Stream stream)
+		public async Task<bool> UploadZipAsync(Guid fileKey, Stream stream)
 		{
 			using var sr = new StreamReader(stream);
 			await sr.ReadToEndAsync();
+			return true;
 		}
 	}
 }
