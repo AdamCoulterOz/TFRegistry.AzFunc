@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 
 namespace PurpleDepot.Controller
 {
@@ -41,7 +42,8 @@ namespace PurpleDepot.Controller
 			response.Content.Headers.ContentType = mediaType;
 			response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
 			{
-				FileName = fileName
+				FileName = fileName,
+				Size = contentLength
 			};
 			return response;
 		}
