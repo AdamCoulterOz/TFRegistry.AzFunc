@@ -6,7 +6,7 @@ namespace PurpleDepot.Data
 {
 	public class ModuleContext : DbContext
 	{
-		public DbSet<Module> Modules { get; set; }
+		public DbSet<Module> Modules => Set<Module>();
 
 		public ModuleContext(DbContextOptions<ModuleContext> options) : base(options) { }
 
