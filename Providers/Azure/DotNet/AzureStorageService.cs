@@ -37,6 +37,8 @@ namespace PurpleDepot.Providers.Storage.Azure
 			return blobClient;
 		}
 
+		public Uri DownloadLink(Guid fileKey) => GetBlobClient(fileKey).Uri;
+
 		public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey)
 		{
 			var client = GetBlobClient(fileKey);

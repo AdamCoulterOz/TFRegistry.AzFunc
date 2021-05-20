@@ -7,6 +7,11 @@ namespace PurpleDepot.Interface.Storage
 {
 	public class MockStorageService : IStorageProvider
 	{
+		public Uri DownloadLink(Guid fileKey)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey)
 		{
 			return await Task.Run(() =>

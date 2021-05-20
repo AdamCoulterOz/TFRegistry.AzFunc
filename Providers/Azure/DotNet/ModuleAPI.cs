@@ -50,7 +50,7 @@ namespace PurpleDepot.Providers.Azure
 		{
 			try
 			{
-				return Download(request.AsRequestMessage(), @namespace, name, provider, request.BaseUrl()).AsResponseData(request);
+				return Download(request.AsRequestMessage(), @namespace, name, provider).AsResponseData(request);
 			}
 			catch (HttpResponseException re)
 			{
@@ -66,7 +66,7 @@ namespace PurpleDepot.Providers.Azure
 		{
 			try
 			{
-				return DownloadSpecific(request.AsRequestMessage(), @namespace, name, provider, version, request.BaseUrl()).AsResponseData(request);
+				return DownloadSpecific(request.AsRequestMessage(), @namespace, name, provider, version).AsResponseData(request);
 			}
 			catch (HttpResponseException re)
 			{

@@ -44,13 +44,13 @@ namespace PurpleDepot.Controller
 		}
 
 		public HttpResponseMessage Download(
-			HttpRequestMessage request, string @namespace, string name, string provider, Uri baseUri)
+			HttpRequestMessage request, string @namespace, string name, string provider)
 		{
-			return DownloadSpecific(request, @namespace, name, provider, "latest", baseUri);
+			return DownloadSpecific(request, @namespace, name, provider, "latest");
 		}
 
 		public HttpResponseMessage DownloadSpecific(
-			HttpRequestMessage request, string @namespace, string name, string provider, string version, Uri baseUri)
+			HttpRequestMessage request, string @namespace, string name, string provider, string version)
 		{
 			request.Authenticate();
 			var module = _moduleContext.GetModule(@namespace, name, provider);
@@ -62,11 +62,8 @@ namespace PurpleDepot.Controller
 			if (fileKey is null)
 				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "Couldn't get file key.");
 			var response = request.CreateResponse(HttpStatusCode.NoContent);
-
-			var uriBuilder = new UriBuilder(baseUri);
-			uriBuilder.Path += $"download/{fileKey.Value}/{module.FileName(version)}";
-
-			response.Headers.Add("X-Terraform-Get", uriBuilder.ToString());
+			var downloadUri = _storageProvider.DownloadLink(fileKey.Value);
+			response.Headers.Add("X-Terraform-Get", downloadUri.ToString());
 			return response;
 		}
 

@@ -8,5 +8,6 @@ namespace PurpleDepot.Interface.Storage
 	{
 		public abstract Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey);
 		public abstract Task<bool> UploadZipAsync(Guid fileKey, Stream stream);
+		public abstract Uri DownloadLink(Guid fileKey);
 	}
 }
