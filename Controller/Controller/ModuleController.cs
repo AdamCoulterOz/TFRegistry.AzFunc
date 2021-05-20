@@ -6,6 +6,7 @@ using PurpleDepot.Model;
 using PurpleDepot.Interface.Storage;
 using Microsoft.Net.Http.Headers;
 using System;
+using System.Web;
 
 namespace PurpleDepot.Controller
 {
@@ -63,7 +64,11 @@ namespace PurpleDepot.Controller
 				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "Couldn't get file key.");
 			var response = request.CreateResponse(HttpStatusCode.NoContent);
 			var downloadUri = _storageProvider.DownloadLink(fileKey.Value);
-			response.Headers.Add("X-Terraform-Get", downloadUri.ToString());
+			var builder = new UriBuilder(downloadUri);
+			var query = HttpUtility.ParseQueryString(builder.Query);
+			query.Add("archive", "zip");
+			builder.Query = query.ToString();
+			response.Headers.Add("X-Terraform-Get", builder.ToString());
 			return response;
 		}
 
