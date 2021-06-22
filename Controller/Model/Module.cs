@@ -37,6 +37,9 @@ namespace PurpleDepot.Model
 		[JsonPropertyName("versions")]
 		public List<ModuleVersion> Versions { get; set; }
 
+		[JsonPropertyName("latest_version")]
+		public string LatestVersion { get => Version()!.Version; }
+
 		public ModuleVersion? Version()
 		{
 			if (Versions.Count == 0)
@@ -67,8 +70,8 @@ namespace PurpleDepot.Model
 
 		public bool HasVersion(string version)
 		{
-			if(Versions.Count == 0) return false;
-			if(version == "latest") return true;
+			if (Versions.Count == 0) return false;
+			if (version == "latest") return true;
 			var versions = VersionsIndex();
 			return versions.ContainsKey(version);
 		}
@@ -96,16 +99,18 @@ namespace PurpleDepot.Model
 		{
 			return ResolveVersion(version)?.Id;
 		}
-		public string FileName(string version) {
+		public string FileName(string version)
+		{
 			var versionResolved = ResolveVersion(version);
-			if(versionResolved is null)
+			if (versionResolved is null)
 				throw new Exception("Couldn't resolve version of module.");
 			return $"{Namespace}-{Provider}-{Name}-{versionResolved.Version}.zip";
 		}
 
 		public ModuleVersion? ResolveVersion(string version)
 		{
-			return version switch {
+			return version switch
+			{
 				"latest" => Version(),
 				_ => Version(version)
 			};
