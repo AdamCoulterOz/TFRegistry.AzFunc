@@ -4,12 +4,13 @@ namespace PurpleDepot.Controller
 {
 	public class ServiceController
 	{
-		public static HttpResponseMessage ServiceDiscovery(HttpRequestMessage request, string moduleV1path)
+		public static HttpResponseMessage ServiceDiscovery(HttpRequestMessage request)
 		{
 			request.Authenticate();
 			var services = new Dictionary<string, string>()
 			{
-				["modules.v1"] = moduleV1path
+				["modules.v1"] = "/v1/modules",
+				["providers.v1"] = "/v1/providers"
 			};
 
 			return request.CreateJsonResponse(services);

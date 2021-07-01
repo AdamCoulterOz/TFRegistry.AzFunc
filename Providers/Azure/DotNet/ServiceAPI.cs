@@ -12,7 +12,7 @@ namespace PurpleDepot.Providers.Azure
 		{
 			try
 			{
-				return ServiceDiscovery(request.AsRequestMessage(), "/v1/modules").AsResponseData(request);
+				return ServiceDiscovery(request.AsRequestMessage()).AsResponseData(request);
 			}
 			catch (HttpResponseException re)
 			{
