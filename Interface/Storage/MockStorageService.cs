@@ -7,12 +7,12 @@ namespace PurpleDepot.Interface.Storage
 {
 	public class MockStorageService : IStorageProvider
 	{
-		public Uri DownloadLink(Guid fileKey)
+		public Uri DownloadLink(Guid fileKey, ObjectType type)
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey)
+		public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey, ObjectType type)
 		{
 			return await Task.Run(() =>
 			{
@@ -23,7 +23,7 @@ namespace PurpleDepot.Interface.Storage
 			});
 		}
 
-		public async Task<bool> UploadZipAsync(Guid fileKey, Stream stream)
+		public async Task<bool> UploadZipAsync(Guid fileKey, Stream stream, ObjectType type)
 		{
 			using var sr = new StreamReader(stream);
 			await sr.ReadToEndAsync();

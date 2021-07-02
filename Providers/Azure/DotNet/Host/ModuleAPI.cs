@@ -6,7 +6,7 @@ using PurpleDepot.Controller;
 using PurpleDepot.Data;
 using PurpleDepot.Interface.Storage;
 
-namespace PurpleDepot.Providers.Azure
+namespace PurpleDepot.Providers.Azure.Host
 {
 	public class ModuleAPI : ModuleController
 	{

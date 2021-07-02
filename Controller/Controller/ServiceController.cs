@@ -6,7 +6,6 @@ namespace PurpleDepot.Controller
 	{
 		public static HttpResponseMessage ServiceDiscovery(HttpRequestMessage request)
 		{
-			request.Authenticate();
 			var services = new Dictionary<string, string>()
 			{
 				["modules.v1"] = "/v1/modules",

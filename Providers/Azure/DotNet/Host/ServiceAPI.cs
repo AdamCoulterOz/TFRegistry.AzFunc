@@ -2,7 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using PurpleDepot.Controller;
 
-namespace PurpleDepot.Providers.Azure
+namespace PurpleDepot.Providers.Azure.Host
 {
 	public class ServiceAPI : ServiceController
 	{

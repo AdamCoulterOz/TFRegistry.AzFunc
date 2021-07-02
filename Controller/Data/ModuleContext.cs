@@ -1,10 +1,10 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using PurpleDepot.Model;
+using PurpleDepot.Interface.Model;
 
 namespace PurpleDepot.Data
 {
-	public class ModuleContext : DbContext
+	public class ModuleContext : DbContext, IItemContext
 	{
 		public DbSet<Module> Modules => Set<Module>();
 
@@ -12,14 +12,18 @@ namespace PurpleDepot.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Module>()
-				.HasIndex(m => new { m.Namespace, m.Name, m.Provider })
-				.IsUnique(true);
+			modelBuilder.Owned<RegistryItemVersion>();
+			modelBuilder.Entity<Module>().HasIndex(m => new { m.Namespace, m.Name, m.Provider }).IsUnique();
+			base.OnModelCreating(modelBuilder);
 		}
 
 		public Module? GetModule(string @namespace, string name, string provider)
+			=> Modules.Where(m => m.Namespace == @namespace && m.Name == name && m.Provider == provider).FirstOrDefault();
+
+		public RegistryItem? GetItem(RegistryItem item)
 		{
-			return Modules.Where(m => m.Namespace == @namespace && m.Name == name && m.Provider == provider).FirstOrDefault();
+			var module = (Module)item;
+			return GetModule(module.Namespace, module.Name, module.Provider);
 		}
 	}
 }

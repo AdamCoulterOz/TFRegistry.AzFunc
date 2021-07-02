@@ -4,26 +4,45 @@ using System.Threading.Tasks;
 using PurpleDepot.Data;
 using PurpleDepot.Model;
 using PurpleDepot.Interface.Storage;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Web;
+using PurpleDepot.Interface.Host;
+using PurpleDepot.Interface.Exceptions;
+using System.IO;
+using System.Collections.Generic;
+using PurpleDepot.Interface.Model;
+using System.Linq;
 
 namespace PurpleDepot.Controller
 {
-	public class ProviderController
+	public class ProviderController : ItemController
 	{
-		private readonly ProviderContext _providerContext;
-		private readonly IStorageProvider _storageProvider;
-		public ProviderController(ProviderContext ProviderContext, IStorageProvider storageProvider)
+		public ProviderController(ProviderContext providerContext, IStorageProvider storageProvider)
+			: base(providerContext, storageProvider)
+				=> ((ProviderContext)_itemContext).Database.EnsureCreated();
+
+		protected override bool Validate(RegistryItem item)
 		{
-			_providerContext = ProviderContext;
-			_storageProvider = storageProvider;
-			_providerContext.Database.EnsureCreated();
+			var provider = (Provider)item;
+			var providerVersion = (ProviderVersion)provider.Version;
+			return providerVersion is not null
+					&& providerVersion.Platforms.Count > 0
+					&& providerVersion.Protocols.Count > 0;
+		}
+
+		protected override bool HasVersion(RegistryItem item, RegistryItemVersion version)
+		{
+			var hasVersion = item.HasVersion(version.Version);
+			var existingVersion = (ProviderVersion)item.Version;
+			var newVersion = (ProviderVersion)version;
+
+			return hasVersion
+				&& existingVersion.Platforms.Contains(newVersion.Platforms.First());
 		}
 
 		public async Task<HttpResponseMessage> DownloadProviderAsync(HttpRequestMessage request, Guid fileKey, string fileName)
 		{
-			var (blobDownloadStream, blobContentLength) = await _storageProvider.DownloadZipAsync(fileKey);
+			var (blobDownloadStream, blobContentLength) = await _storageProvider.DownloadZipAsync(fileKey, ObjectType.Provider);
 			if (blobDownloadStream is null)
 				return request.CreateStringResponse(HttpStatusCode.NotFound, "Cannot find provider zip.");
 			return request.CreateZipDownloadResponse(blobDownloadStream, fileName, blobContentLength);
@@ -39,9 +58,11 @@ namespace PurpleDepot.Controller
 			if (provider is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
-			var providerCollection = new ProviderCollection();
-			providerCollection.Providers.Add(provider);
-			return request.CreateJsonResponse(providerCollection);
+			var providerVersionCollection = new ProviderVersionCollection
+			{
+				Versions = provider.Versions
+			};
+			return request.CreateJsonResponse(providerVersionCollection);
 		}
 
 		public HttpResponseMessage Download(
@@ -63,7 +84,7 @@ namespace PurpleDepot.Controller
 			if (fileKey is null)
 				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "Couldn't get file key.");
 			var response = request.CreateResponse(HttpStatusCode.NoContent);
-			var downloadUri = _storageProvider.DownloadLink(fileKey.Value);
+			var downloadUri = _storageProvider.DownloadLink(fileKey.Value, ObjectType.Provider);
 			var builder = new UriBuilder(downloadUri);
 			var query = HttpUtility.ParseQueryString(builder.Query);
 			query.Add("archive", "zip");
@@ -93,38 +114,17 @@ namespace PurpleDepot.Controller
 			return request.CreateJsonResponse(provider);
 		}
 
-		public async Task<HttpResponseMessage> Ingest(
-			HttpRequestMessage request,
-			string @namespace, string name, string version)
+		public async Task Ingest(Provider request, Stream content)
 		{
-			request.Authenticate();
 
-			if (request.Content is null)
-				return request.CreateResponse(HttpStatusCode.BadRequest);
 
-			var provider = _providerContext.GetProvider(@namespace, name);
-			var hasVersion = provider?.HasVersion(version);
+			provider.AddVersion(request.Version, request.Protocols, platforms);
 
-			if (provider is not null && hasVersion is not null && hasVersion.Value)
-				return request.CreateStringResponse(HttpStatusCode.Conflict, "Provider already exists with the same name and version");
-
-			var length = request.Content.Headers.ContentLength;
-			if (length is null || length.Equals(0L))
-				return request.CreateStringResponse(HttpStatusCode.BadRequest, $"'{HeaderNames.ContentLength}' is zero or not set");
-
-			if (provider is null)
-			{
-				provider = new Provider(@namespace, name);
-				_providerContext.Add(provider);
-			}
-			provider.AddVersion(version);
-
-			var stream = await request.Content.ReadAsStreamAsync();
-			var fileKey = provider.FileId(version);
+			var fileKey = provider.FileId(request.Version);
 			if (fileKey is null)
-				return request.CreateStringResponse(HttpStatusCode.InternalServerError, "There was an issue trying to create the new version.");
+				throw new Exception("There was an issue trying to create the new version.");
 
-			bool hadContent = await _storageProvider.UploadZipAsync(fileKey.Value, stream);
+			bool hadContent = await _storageProvider.UploadZipAsync(fileKey.Value, content, ObjectType.Provider);
 
 			if (hadContent)
 			{

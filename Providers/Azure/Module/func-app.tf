@@ -19,8 +19,6 @@ resource "azurerm_app_service_plan" "app_plan" {
   }
 }
 
-resource "random_uuid" "auth_token" {}
-
 resource "azurerm_function_app" "app" {
   name                       = var.instance_name
   location                   = azurerm_resource_group.instance.location
@@ -33,12 +31,12 @@ resource "azurerm_function_app" "app" {
   version                    = "~3"
   client_affinity_enabled    = false
   app_settings = {
-    FUNCTIONS_WORKER_RUNTIME = "dotnet-isolated"
-    PURPLEDEPOT_AUTHTOKEN    = random_uuid.auth_token.result
-    STORAGE_ACCOUNT          = azurerm_storage_account.module_repo.name
-    BLOB_CONTAINER           = azurerm_storage_container.module_repo.name
-    COSMOS_CONNECTION_STRING = azurerm_cosmosdb_account.db.connection_strings[0]
-    SERVICE_INJECTION        = "Azure"
+    FUNCTIONS_WORKER_RUNTIME                                  = "dotnet-isolated"
+    PurpleDepot__Provider                                     = "Azure"
+    PurpleDepot__AzureStorageOptions__BlobEndpointUrl         = azurerm_storage_account.module_repo.primary_blob_endpoint
+    PurpleDepot__AzureStorageOptions__ModuleContainer         = azurerm_storage_container.module_repo.name
+    PurpleDepot__AzureStorageOptions__ProviderContainer       = azurerm_storage_container.provider_repo.name
+    PurpleDepot__AzureDatabaseOptions__CosmosConnectionString = azurerm_cosmosdb_account.db.connection_strings[0]
   }
 
   site_config {
