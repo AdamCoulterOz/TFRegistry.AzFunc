@@ -1,0 +1,123 @@
+parameters:
+  - name: TFRegistryURL
+    type: string
+
+  - name: ModuleFolder
+    type: string
+
+  - name: Namespace
+    type: string
+
+  - name: Name
+    type: string
+
+  - name: Provider
+    type: string
+    values:
+      - azurerm
+      - azuread
+      - mysql
+      - aws
+      - google
+      - kubernetes
+      - oci
+
+  - name: Version
+    type: string
+
+  - name: AzConnection
+    type: string
+
+steps:
+  - task: UpdateBuildNumber@0
+    inputs:
+      buildNumber: ${{ parameters.Version }}
+
+  - template: ./terraform-rc.yml
+    parameters:
+      Path: ${{ parameters.ModuleFolder }}
+      AzConnection: ${{ parameters.AzConnection }}
+      TFRegistryUrl: ${{ parameters.TFRegistryURL }}
+
+  - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+    displayName: "TF Install"
+
+  - task: TerraformCLI@0
+    displayName: "TF Initialise"
+    inputs:
+      command: init
+      workingDirectory: ${{ parameters.ModuleFolder }}
+
+  - task: TerraformCLI@0
+    displayName: "TF Validate"
+    inputs:
+      workingDirectory: ${{ parameters.ModuleFolder }}
+
+  - task: CopyFiles@2
+    displayName: "Stage Files for Registry"
+    inputs:
+      SourceFolder: ${{ parameters.ModuleFolder }}
+      Contents: |
+        **
+        !.terraform/**/*
+        !.git/**/*
+      TargetFolder: ${{ parameters.ModuleFolder }}/build
+
+  - task: CopyFiles@2
+    displayName: "Stage Files for Pipeline Artefact"
+    inputs:
+      SourceFolder: ${{ parameters.ModuleFolder }}
+      Contents: |
+        **
+        !.terraform/**/*
+        !.git/**/*
+      TargetFolder: ${{ parameters.ModuleFolder }}/artefact
+
+  - task: ArchiveFiles@2
+    displayName: "Zip Module"
+    inputs:
+      rootFolderOrFile: ${{ parameters.ModuleFolder }}/build
+      includeRootFolder: false
+      archiveFile: ${{ format('{0}/build/{1}-{2}-{3}-{4}.zip', parameters.ModuleFolder, parameters.Namespace, parameters.Name, parameters.Provider, parameters.Version) }}
+
+  - task: PublishBuildArtifacts@1
+    displayName: "Publish Module"
+    inputs:
+      PathtoPublish: ${{ format('{0}/artefact/', parameters.ModuleFolder) }}
+      ArtifactName: module
+
+  - task: AzureCLI@2
+    displayName: "Publish Module to Registry"
+    env:
+      namespace: ${{ parameters.Namespace }}
+      name: ${{ parameters.Name }}
+      provider: ${{ parameters.Provider }}
+      version: ${{ parameters.Version }}
+    inputs:
+      azureSubscription: ${{ parameters.AzConnection }}
+      scriptType: pscore
+      scriptLocation: inlineScript
+      addSpnToEnvironment: true
+      workingDirectory: ${{ parameters.ModuleFolder }}/build
+      inlineScript: |
+        $authUrl = "https://login.microsoftonline.com/$($env:tenantId)/oauth2/token"
+        Write-Output $authUrl
+        $form = @{
+          grant_type    = 'client_credentials'
+          client_id     = $env:servicePrincipalId
+          client_secret = $env:servicePrincipalKey
+          resource      = '${{ parameters.TFRegistryURL }}'
+        }
+        Write-Output $form
+        $authResult = Invoke-RestMethod -Uri $authUrl -Method Post -Form $form
+        $parts = @($env:namespace, $env:name, $env:provider, $env:version)
+        Write-Output $(Get-ChildItem)
+        $modPath = Join-String -Separator '/' -InputObject $parts
+        $modUrl = "${{ parameters.TFRegistryURL }}/v1/modules/$modPath/upload"
+        Write-Output $modUrl
+        $fileName = Join-String -Separator '-' -InputObject $parts
+        $fileName += ".zip"
+
+        $secureToken = ConvertTo-SecureString $authResult.access_token -AsPlainText -Force
+        $filePath = Join-Path $(Get-Location) $fileName
+        Write-Output $(Invoke-RestMethod -Uri $modUrl -Method Post -InFile $filePath -Authentication Bearer -Token $secureToken)

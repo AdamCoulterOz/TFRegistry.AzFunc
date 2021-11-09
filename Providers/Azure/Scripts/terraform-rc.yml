@@ -1,0 +1,40 @@
+parameters:
+
+  - name: Path
+    type: string
+
+  - name: AzConnection
+    type: string
+
+  - name: TFRegistryURL
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: "Create Terraform RC File"
+    inputs:
+      azureSubscription: ${{ parameters.AzConnection }}
+      scriptType: pscore
+      scriptLocation: inlineScript
+      addSpnToEnvironment: true
+      workingDirectory: ${{ parameters.Path }}
+      inlineScript: |
+        $authUrl = "https://login.microsoftonline.com/$($env:tenantId)/oauth2/token"
+        Write-Output $authUrl
+        $form = @{
+          grant_type    = 'client_credentials'
+          client_id     = $env:servicePrincipalId
+          client_secret = $env:servicePrincipalKey
+          resource      = '${{ parameters.TFRegistryURL }}'
+        }
+        Write-Output $form
+        $authResult = Invoke-RestMethod -Uri $authUrl -Method Post -Form $form
+        Write-Output $authResult
+        $terraformrc = @"
+        credentials "terraform.sentral.com.au" {
+          token = "$($authResult.access_token)"
+        }
+        "@
+        Write-Output $terraformrc
+        Set-Content -Path ~/.terraformrc -Value $terraformrc
+        Write-Output $(Get-Content ~/.terraformrc)
