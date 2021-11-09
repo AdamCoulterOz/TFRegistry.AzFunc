@@ -19,6 +19,8 @@ resource "azurerm_app_service_plan" "app_plan" {
   }
 }
 
+data "azuread_client_config" "current" {}
+
 resource "azurerm_function_app" "app" {
   name                       = var.instance_name
   location                   = azurerm_resource_group.instance.location
@@ -29,7 +31,7 @@ resource "azurerm_function_app" "app" {
   os_type                    = "linux"
   https_only                 = true
   version                    = "~3"
-  client_affinity_enabled    = false
+
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME                                  = "dotnet-isolated"
     PurpleDepot__Provider                                     = "Azure"
@@ -40,11 +42,27 @@ resource "azurerm_function_app" "app" {
   }
 
   site_config {
+    always_on = false
     use_32_bit_worker_process = false
     min_tls_version           = "1.2"
   }
 
   identity {
     type = "SystemAssigned"
+  }
+
+  auth_settings {
+    default_provider               = "AzureActiveDirectory"
+    enabled                        = true
+    issuer                         = "https://sts.windows.net/${data.azuread_client_config.current.tenant_id}/"
+    runtime_version                = "~1"
+    token_refresh_extension_hours  = 72
+    token_store_enabled            = true
+    unauthenticated_client_action  = "RedirectToLoginPage"
+    active_directory {
+      allowed_audiences = [var.url]
+      client_id         = azuread_application.terraform.application_id
+      client_secret     = null
+    }
   }
 }
