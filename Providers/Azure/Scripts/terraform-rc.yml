@@ -21,17 +21,19 @@ steps:
       inlineScript: |
         $authUrl = "https://login.microsoftonline.com/$($env:tenantId)/oauth2/token"
         Write-Output $authUrl
+        $TFRegistryURL='${{ parameters.TFRegistryURL }}'
         $form = @{
           grant_type    = 'client_credentials'
           client_id     = $env:servicePrincipalId
           client_secret = $env:servicePrincipalKey
-          resource      = '${{ parameters.TFRegistryURL }}'
+          resource      = $TFRegistryURL
         }
         Write-Output $form
         $authResult = Invoke-RestMethod -Uri $authUrl -Method Post -Form $form
         Write-Output $authResult
+        $url=[System.Uri]$TFRegistryURL
         $terraformrc = @"
-        credentials "terraform.sentral.com.au" {
+        credentials "$($url.Host)" {
           token = "$($authResult.access_token)"
         }
         "@
