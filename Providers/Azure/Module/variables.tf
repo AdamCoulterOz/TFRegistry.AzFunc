@@ -15,6 +15,7 @@ variable "cosmos_location" {
 }
 
 variable "url" {
+  type = string
 #   example = "https://terraform.mycompany.com"
 }
 

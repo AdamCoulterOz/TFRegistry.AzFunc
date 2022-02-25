@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "module_repo" {
-  name                     = "${var.instance_name}repo"
+  name                     = var.instance_name
   resource_group_name      = azurerm_resource_group.instance.name
   location                 = azurerm_resource_group.instance.location
   account_tier             = "Standard"
@@ -20,7 +20,7 @@ resource "azurerm_role_assignment" "controller_storage_access_modules" {
 }
 
 resource "azurerm_storage_container" "provider_repo" {
-  name                  = "provider"
+  name                  = "providers"
   storage_account_name  = azurerm_storage_account.module_repo.name
   container_access_type = "blob"
 }
