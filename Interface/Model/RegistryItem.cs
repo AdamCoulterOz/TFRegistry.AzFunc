@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
+using FluentAssertions;
 
 namespace PurpleDepot.Interface.Model;
-public abstract class RegistryItem<T> where T: RegistryItemVersion
+
+public abstract class RegistryItem<V> : IRegistryItem
+	where V : RegistryItemVersion
 {
-	public string Id => $"{Address}/{Version}";
+	public Address Id => Address;
 
 	[JsonPropertyName("owner")]
 	public string Owner { get; set; }
@@ -15,7 +18,8 @@ public abstract class RegistryItem<T> where T: RegistryItemVersion
 	public string Name { get; set; }
 
 	/// <summary>Latest version</summary>
-	public T? Version => LatestVersion;
+	public V Version => Versions.Max()!;
+	RegistryItemVersion IRegistryItem.Version => Version;
 
 	[JsonPropertyName("description")]
 	public string? Description { get; set; }
@@ -27,29 +31,45 @@ public abstract class RegistryItem<T> where T: RegistryItemVersion
 	public DateTime PublishedAt { get; set; }
 
 	[JsonPropertyName("versions")]
-	public virtual List<T> Versions { get; set; }
+	public virtual List<V> Versions { get; set; }
 
 	[JsonPropertyName("logo_url")]
 	public Uri? LogoUrl { get; set; }
 
 	[JsonIgnore]
-	public virtual string Address => $"{Namespace}/{Name}";
+	public abstract Address Address { get; }
 
 	[JsonConstructor]
-	public RegistryItem(string owner, string @namespace, string name, Uri source, DateTime published_at, List<T> versions, string? description = null, Uri? logo_url = null)
-		=> (Owner, Namespace, Name, Description, Source, PublishedAt, Versions, LogoUrl) = (owner, @namespace, name, description, source, published_at, versions, logo_url);
+	public RegistryItem(string owner, string @namespace, string name, Uri source, DateTime published_at, List<V> versions, string? description = null, Uri? logo_url = null)
+	{
+		(Owner, Namespace, Name, Description, Source, PublishedAt, Versions, LogoUrl) = (owner, @namespace, name, description, source, published_at, versions, logo_url);
+		Versions.Should().NotBeEmpty(because: "all registry items must have at least one version in order to exist");
+	}
 
-	/// <summary>Gets latest version</summary>
-	public T? LatestVersion => Versions.Max();
+	public bool HasVersion(string version)
+		=> GetVersion(version) is not null;
 
 	/// <summary>Gets specific version</summary>
-	public T? GetVersion(string version)
-		=> Versions.Where(v => v.Version == version).FirstOrDefault();
+	public V? GetVersion(string? version = null)
+	{
+		if(version is null)
+			return Version;
+		return Versions.Where(v => v.Version == version).FirstOrDefault();
+	}
+	RegistryItemVersion? IRegistryItem.GetVersion(string? version) => GetVersion(version);
 
-	public void AddVersion(T version)
+	public void AddVersion(V version)
 	{
 		if (GetVersion(version.Version) is not null)
 			throw new Exception("Version already exists");
 		Versions.Add(version);
+	}
+	void IRegistryItem.AddVersion(RegistryItemVersion version) => AddVersion((V)version);
+
+	public string GetFileKey(RegistryItemVersion? version = null)
+	{
+		if(version is null)
+			version = Version;
+		return $"{Address}/{version.Key}-{version.Version}.zip";
 	}
 }

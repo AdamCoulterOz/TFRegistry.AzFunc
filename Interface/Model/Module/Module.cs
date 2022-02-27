@@ -10,7 +10,10 @@ public class Module : RegistryItem<RegistryItemVersion>
 	public List<string> Providers { get; set; }
 
 	[JsonIgnore]
-	public override string Address => $"{base.Address}/{Provider}";
+	public override ModuleAddress Address => GetAddress(Namespace, Name, Provider);
+
+	public static ModuleAddress GetAddress(string @namespace, string name, string provider)
+		=> new ModuleAddress(@namespace, name, provider);
 
 	[JsonConstructor]
 	public Module(string owner, string @namespace, string name, Uri source, DateTime published_at, List<RegistryItemVersion> versions, string provider, List<string> providers, string? description = null, Uri? logo_url = null)

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Net.Http;
 namespace PurpleDepot.Controller;
 
 public class ServiceController

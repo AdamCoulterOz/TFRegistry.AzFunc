@@ -1,9 +1,10 @@
-namespace PurpleDepot.Interface.Storage;
+using PurpleDepot.Interface.Model;
 
+namespace PurpleDepot.Interface.Storage;
 public enum ObjectType { Module, Provider }
-public interface IStorageProvider
+public interface IStorageProvider<T> where T : IRegistryItem
 {
-	public abstract Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey, ObjectType type);
-	public abstract Task<bool> UploadZipAsync(Guid fileKey, Stream stream, ObjectType type);
-	public abstract Uri DownloadLink(Guid fileKey, ObjectType type);
+	public abstract Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(string fileKey);
+	public abstract Task<bool> UploadZipAsync(string fileKey, Stream stream);
+	public abstract Uri DownloadLink(string fileKey);
 }

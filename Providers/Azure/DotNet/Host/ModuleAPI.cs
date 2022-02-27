@@ -13,21 +13,6 @@ namespace PurpleDepot.Providers.Azure.Host
 		public ModuleAPI(ModuleContext moduleContext, IStorageProvider storageProvider)
 			: base(moduleContext, storageProvider) { }
 
-		[Function(nameof(GetDownloadModuleAsync))]
-		public async Task<HttpResponseData> GetDownloadModuleAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "download/{fileKey}/{fileName}")]
-			HttpRequestData request, string fileKey, string fileName)
-		{
-			try
-			{
-				return (await DownloadModuleAsync(request.AsRequestMessage(), new Guid(fileKey), fileName)).AsResponseData(request);
-			}
-			catch (HttpResponseException re)
-			{
-				return re.Response.AsResponseData(request);
-			}
-		}
-
 		[Function(nameof(GetVersions))]
 		public HttpResponseData GetVersions(
 			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/modules/{namespace}/{name}/{provider}/versions")]
