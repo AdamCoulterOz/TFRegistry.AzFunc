@@ -1,33 +1,28 @@
-using System;
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace PurpleDepot.Interface.Storage
+namespace PurpleDepot.Interface.Storage;
+public class MockStorageService : IStorageProvider
 {
-	public class MockStorageService : IStorageProvider
+	public Uri DownloadLink(Guid fileKey, ObjectType type)
 	{
-		public Uri DownloadLink(Guid fileKey, ObjectType type)
-		{
-			throw new NotImplementedException();
-		}
+		throw new NotImplementedException();
+	}
 
-		public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey, ObjectType type)
+	public async Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(Guid fileKey, ObjectType type)
+	{
+		return await Task.Run(() =>
 		{
-			return await Task.Run(() =>
-			{
-				var file = "asfhjklasfghjkalsfd";
-				var bytes = Encoding.ASCII.GetBytes(file);
+			var file = "asfhjklasfghjkalsfd";
+			var bytes = Encoding.ASCII.GetBytes(file);
 
-				return (new MemoryStream(bytes), bytes.Length);
-			});
-		}
+			return (new MemoryStream(bytes), bytes.Length);
+		});
+	}
 
-		public async Task<bool> UploadZipAsync(Guid fileKey, Stream stream, ObjectType type)
-		{
-			using var sr = new StreamReader(stream);
-			await sr.ReadToEndAsync();
-			return true;
-		}
+	public async Task<bool> UploadZipAsync(Guid fileKey, Stream stream, ObjectType type)
+	{
+		using var sr = new StreamReader(stream);
+		await sr.ReadToEndAsync();
+		return true;
 	}
 }
