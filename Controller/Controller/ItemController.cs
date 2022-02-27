@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using PurpleDepot.Data;
 using PurpleDepot.Interface.Exceptions;
@@ -8,18 +10,18 @@ using PurpleDepot.Interface.Storage;
 
 namespace PurpleDepot.Controller
 {
-	public abstract class ItemController
+	public abstract class ItemController<T> where T : IRegistryItem
 	{
-		protected readonly IItemContext _itemContext;
+		protected readonly ItemContext _itemContext;
 		protected readonly IStorageProvider _storageProvider;
 
-		public ItemController(IItemContext itemContext, IStorageProvider storageProvider)
+		public ItemController(ItemContext itemContext, IStorageProvider storageProvider)
 		{
 			_itemContext = itemContext;
 			_storageProvider = storageProvider;
 		}
 
-		public async Task Ingest(RegistryItem newItem, Stream stream)
+		public async Task<HttpResponseMessage> Ingest(HttpRequestMessage request, T newItem, Stream stream)
 		{
 			var item = _itemContext.GetItem(newItem);
 
@@ -44,7 +46,7 @@ namespace PurpleDepot.Controller
 
 			if (hadContent)
 			{
-				_moduleContext.SaveChanges();
+				_itemContext.SaveChanges();
 				return request.CreateResponse(HttpStatusCode.Created);
 			}
 			else
@@ -53,7 +55,7 @@ namespace PurpleDepot.Controller
 			}
 		}
 
-		protected abstract bool Validate(RegistryItem item);
-		protected abstract bool HasVersion(RegistryItem item, RegistryItemVersion version);
+		protected abstract bool Validate(IRegistryItem item);
+		protected abstract bool HasVersion(IRegistryItem item, RegistryItemVersion version);
 	}
 }

@@ -2,14 +2,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using PurpleDepot.Data;
-using PurpleDepot.Model;
 using PurpleDepot.Interface.Storage;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Web;
 using PurpleDepot.Interface.Exceptions;
 using PurpleDepot.Interface.Model;
-using System.IO;
 
 namespace PurpleDepot.Controller
 {
@@ -43,7 +40,7 @@ namespace PurpleDepot.Controller
 			HttpRequestMessage request,
 			string @namespace, string name, string provider)
 		{
-			var module = _moduleContext.GetModule(@namespace, name, provider);
+			var module = _itemContext.GetModule(@namespace, name, provider);
 			if (module is null)
 				return request.CreateResponse(HttpStatusCode.NotFound);
 
@@ -59,8 +56,7 @@ namespace PurpleDepot.Controller
 		public HttpResponseMessage DownloadSpecific(
 			HttpRequestMessage request, string @namespace, string name, string provider, string version)
 		{
-
-			var module = _moduleContext.GetModule(@namespace, name, provider);
+			var module = _itemContext.GetItem(@namespace, name, provider);
 			if (module is null)
 				return request.CreateStringResponse(HttpStatusCode.NotFound, "Module doesn't exist at any version.");
 			if (!module.HasVersion(version))
@@ -78,12 +74,12 @@ namespace PurpleDepot.Controller
 			return response;
 		}
 
-		public HttpResponseMessage Latest(Interface.Host.Module moduleRequest)
+		public HttpResponseMessage Latest(Module moduleRequest)
 			=> Specific(moduleRequest, "latest");
 
-		public Model.DataModule Specific(Interface.Host.Module request, string version)
+		public DataModule Specific(HttpRequestMessage request, string namespace, string name, string version)
 		{
-			var module = _moduleContext.GetModule(request.Namespace, request.Name, request.Provider);
+			var module = _itemContext.GetItem(request.Namespace, request.Name, request.Provider);
 			if (module is null)
 				throw new NotFoundException(request);
 			if (!module.HasVersion(version))

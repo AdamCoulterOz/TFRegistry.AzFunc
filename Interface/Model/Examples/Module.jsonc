@@ -1,0 +1,75 @@
+// Module
+{
+  "id": "GoogleCloudPlatform/managed-instance-group/google/1.1.15",
+  "owner": "danisla",
+  "namespace": "GoogleCloudPlatform",
+  "name": "managed-instance-group",
+  "version": "1.1.15",
+  "description": "Modular Google Compute Engine managed instance group for Terraform.",
+  "source": "https://github.com/GoogleCloudPlatform/terraform-google-managed-instance-group",
+  "published_at": "2019-02-14T16:55:26.567562Z",
+  "provider_logo_url": "/images/providers/google-cloud.svg",
+  "provider": "google",
+  "providers": [
+    "google"
+  ],
+  "versions": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "1.0.1"
+    },
+    {
+      "version": "1.0.2"
+    },
+    {
+      "version": "1.1.0"
+    },
+    {
+      "version": "1.1.1"
+    },
+    {
+      "version": "1.1.2"
+    },
+    {
+      "version": "1.1.3"
+    },
+    {
+      "version": "1.1.4"
+    },
+    {
+      "version": "1.1.5"
+    },
+    {
+      "version": "1.1.6"
+    },
+    {
+      "version": "1.1.7"
+    },
+    {
+      "version": "1.1.8"
+    },
+    {
+      "version": "1.1.9"
+    },
+    {
+      "version": "1.1.10"
+    },
+    {
+      "version": "1.1.11"
+    },
+    {
+      "version": "1.1.12"
+    },
+    {
+      "version": "1.1.13"
+    },
+    {
+      "version": "1.1.14"
+    },
+    {
+      "version": "1.1.15"
+    }
+  ]
+}

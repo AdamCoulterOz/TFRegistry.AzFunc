@@ -1,11 +1,12 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.AspNetCore.Mvc;
 using PurpleDepot.Interface.Storage;
 using System.IO;
-using PurpleDepot.Interface.Host;
+using PurpleDepot.Controller;
+using PurpleDepot.Data;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 
 namespace PurpleDepot.Providers.Azure.Host
 {
