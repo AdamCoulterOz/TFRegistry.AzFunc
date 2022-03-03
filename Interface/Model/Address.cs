@@ -1,4 +1,4 @@
-namespace PurpleDepot.Interface.Model;
+namespace Interface.Model;
 
 public abstract class Address<T>
 	where T: RegistryItem<T>

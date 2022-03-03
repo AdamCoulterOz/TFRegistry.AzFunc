@@ -1,9 +1,6 @@
-using System;
+namespace Azure.Database;
 
-namespace PurpleDepot.Providers.Azure.Database
+public class AzureDatabaseOptions
 {
-	public class AzureDatabaseOptions
-	{
-		public string CosmosConnectionString { get; set; } = null!;
-	}
+	public string CosmosConnectionString { get; set; } = null!;
 }

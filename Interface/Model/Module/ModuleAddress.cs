@@ -1,10 +1,10 @@
 using FluentAssertions;
 
-namespace PurpleDepot.Interface.Model.Module;
+namespace Interface.Model.Module;
 
 public class ModuleAddress : Address<Module>
 {
-	public string Provider { get; init; }
+	public string Provider { get; }
 
 	public ModuleAddress(string @namespace, string name, string provider) : base(@namespace, name)
 		=> Provider = provider;

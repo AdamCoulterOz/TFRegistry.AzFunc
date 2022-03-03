@@ -1,8 +1,7 @@
-
 using System.Text.Json.Serialization;
 using SemVersion;
 
-namespace PurpleDepot.Interface.Model;
+namespace Interface.Model;
 
 public class RegistryItemVersion : SemanticVersion
 {
@@ -35,7 +34,7 @@ public class RegistryItemVersion : SemanticVersion
 		=> ToSemVer(version).Prerelease;
 
 	private static SemanticVersion ToSemVer(string version)
-		=> SemanticVersion.Parse(version);
+		=> Parse(version);
 
 
 #nullable disable

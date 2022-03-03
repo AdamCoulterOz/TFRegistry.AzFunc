@@ -1,10 +1,10 @@
-using PurpleDepot.Interface.Model;
+using Interface.Model;
 
-namespace PurpleDepot.Interface.Storage;
+namespace Interface.Storage;
 public interface IStorageProvider<T>
 	where T : RegistryItem<T>
 {
-	public abstract Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(string fileKey);
-	public abstract Task<bool> UploadZipAsync(string fileKey, Stream stream);
-	public abstract Uri DownloadLink(string fileKey);
+	public Task<(Stream? Stream, long? ContentLength)> DownloadZipAsync(string fileKey);
+	public Task<bool> UploadZipAsync(string fileKey, Stream stream);
+	public Uri DownloadLink(string fileKey);
 }

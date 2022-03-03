@@ -1,7 +1,7 @@
 using System.Text;
-using PurpleDepot.Interface.Model;
+using Interface.Model;
 
-namespace PurpleDepot.Interface.Storage;
+namespace Interface.Storage;
 public class MockStorageService<T> : IStorageProvider<T> where T: RegistryItem<T>
 {
 	public Uri DownloadLink(string fileKey)

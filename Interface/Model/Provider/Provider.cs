@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
 
-namespace PurpleDepot.Interface.Model.Provider;
+namespace Interface.Model.Provider;
 public class Provider : RegistryItem<Provider>
 {
 	[JsonPropertyName("alias")]
 	public string? Alias { get; set; }
 
-	public override Address<Provider> Address => (Address<Provider>)GetAddress(Namespace, Name);
+	public override Address<Provider> Address => GetAddress(Namespace, Name);
 
 	public List<ProviderVersion> Versions { get; init; }
 	public override List<RegistryItemVersion> GetVersions() => Versions.ToList<RegistryItemVersion>();
@@ -42,6 +42,6 @@ public class Provider : RegistryItem<Provider>
 		=> AddSpecificVersion(new ProviderVersion(version));
 
 #nullable disable
-	protected Provider() : base()
+	protected Provider()
 	{ }
 }

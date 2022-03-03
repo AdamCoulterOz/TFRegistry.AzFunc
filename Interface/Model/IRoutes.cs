@@ -1,4 +1,4 @@
-namespace PurpleDepot.Interface.Routes;
+namespace Interface.Model;
 
 public interface IRoutes
 {

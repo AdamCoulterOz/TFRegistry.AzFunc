@@ -1,12 +1,12 @@
-using PurpleDepot.Interface.Model;
+using Interface.Model;
 
-namespace PurpleDepot.Data;
+namespace Controller.Data;
 
 public interface IRepository<T>
 	where T : RegistryItem<T>
 {
 	void Add(T item);
-	bool EnsureCreated();
+	void EnsureCreated();
 	Task<T?> GetItemAsync(Address<T> itemId);
 	void SaveChanges();
 }

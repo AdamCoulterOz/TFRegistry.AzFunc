@@ -1,26 +1,23 @@
 using System.Text.Json.Serialization;
 
-namespace PurpleDepot.Interface.Model.Module;
+namespace Interface.Model.Module;
 public class Module : RegistryItem<Module>
 {
 	[JsonPropertyName("provider")]
-	public string Provider { get; set; }
+	public string Provider { get; }
 
 	[JsonPropertyName("providers")]
-	public List<string> Providers { get; init; }
+	public List<string> Providers { get; }
 
-	public List<ModuleVersion> Versions { get; init; }
+	public List<ModuleVersion> Versions { get; }
 
 	[JsonIgnore]
 	public override ModuleAddress Address => GetAddress(Namespace, Name, Provider);
 
 	public override List<RegistryItemVersion> GetVersions() => Versions.ToList<RegistryItemVersion>();
 
-	public static ModuleAddress GetAddress(string @namespace, string name, string provider)
+	private static ModuleAddress GetAddress(string @namespace, string name, string provider)
 		=> new ModuleAddress(@namespace, name, provider);
-
-	public static ModuleAddress GetAddress(string value)
-	=> ModuleAddress.Parse(value);
 
 	public static Module New(ModuleAddress id, string version)
 		=> new Module(id, version);
@@ -53,5 +50,6 @@ public class Module : RegistryItem<Module>
 			=> (Provider, Providers, Versions) = (provider, providers, versions);
 
 #nullable disable
-	protected Module() : base() { }
+	protected Module()
+	{ }
 }

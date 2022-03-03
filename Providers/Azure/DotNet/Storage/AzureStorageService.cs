@@ -1,12 +1,12 @@
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using PurpleDepot.Interface.Storage;
+using Interface.Model;
+using Interface.Storage;
 using Microsoft.Azure.Storage;
 using Microsoft.Extensions.Options;
-using PurpleDepot.Interface.Model;
 
-namespace PurpleDepot.Providers.Azure.Storage;
+namespace Azure.Storage;
 public class AzureStorageService<T> : IStorageProvider<T>
 	where T : RegistryItem<T>
 {
@@ -17,15 +17,13 @@ public class AzureStorageService<T> : IStorageProvider<T>
 
 	private BlobClient GetBlobClient(string fileKey)
 	{
-		var blobName = fileKey;
-		var containerName = typeof(T).Name;
-		NameValidator.ValidateContainerName(containerName);
-		NameValidator.ValidateBlobName(blobName);
+		NameValidator.ValidateContainerName(_options.BlobContainerName);
+		NameValidator.ValidateBlobName(fileKey);
 
 		var credOptions = new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true };
 		var credential = new DefaultAzureCredential(credOptions);
 		var containerClient = new BlobContainerClient(_options.BlobClientUrl, credential);
-		var blobClient = containerClient.GetBlobClient(blobName);
+		var blobClient = containerClient.GetBlobClient(fileKey);
 		return blobClient;
 	}
 
@@ -44,7 +42,7 @@ public class AzureStorageService<T> : IStorageProvider<T>
 	{
 		var client = GetBlobClient(fileKey);
 		var header = new BlobHttpHeaders { ContentType = "application/zip" };
-		await client.UploadAsync(content: stream, httpHeaders: header);
+		await client.UploadAsync(stream, header);
 		stream.Close();
 
 		var properties = (await client.GetPropertiesAsync()).Value;

@@ -1,14 +1,14 @@
-using PurpleDepot.Interface.Routes;
+using Interface.Model;
 
-namespace PurpleDepot.Controller;
+namespace Controller.Controller;
 public class ServiceController
 {
-	private static Dictionary<string, string> Services;
+	private static readonly Dictionary<string, string> Services;
 	static ServiceController()
 	{
 		Services = new Dictionary<string, string>();
 		var routableServices = AppDomain.CurrentDomain.GetAssemblies().SelectMany(
-						assembily => assembily.GetTypes().Where(
+						assembly => assembly.GetTypes().Where(
 							type => type.GetInterfaces().Contains(typeof(IRoutes))
 								&& !type.IsAbstract));
 
@@ -20,12 +20,7 @@ public class ServiceController
 			);
 		}
 	}
-	public static async Task<HttpResponseMessage> ServiceDiscovery(HttpRequestMessage request)
-		=> await Task.Run(() => request.CreateJsonResponse(Services));
-}
 
-public static class RandomExtensions
-{
-	public static T? GetStaticProperty<T>(this Type type, string name)
-		=> (T?)type.GetProperty(name)?.GetValue(null);
+	protected static async Task<HttpResponseMessage> ServiceDiscovery(HttpRequestMessage request)
+		=> await Task.Run(() => request.CreateJsonResponse(Services));
 }

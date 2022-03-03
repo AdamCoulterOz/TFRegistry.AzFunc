@@ -1,11 +1,11 @@
+using System.Text.Json;
+using Interface.Model;
+using Interface.Model.Module;
+using Interface.Model.Provider;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PurpleDepot.Interface.Model;
-using PurpleDepot.Interface.Model.Module;
-using PurpleDepot.Interface.Model.Provider;
-using System.Text.Json;
 
-namespace PurpleDepot.Data;
+namespace Controller.Data;
 public class AppContext : DbContext
 {
 	public AppContext(DbContextOptions<AppContext> options) : base(options) { }
@@ -19,27 +19,27 @@ public class AppContext : DbContext
 
 		modelBuilder.Entity<Provider>(pe =>
 		{
-			pe.OwnsMany<ProviderVersion>(p => p.Versions, pve =>
+			pe.OwnsMany(p => p.Versions, pve =>
 			{
-				pve.OwnsMany<ProviderPlatform>(pv => pv.Platforms);
+				pve.OwnsMany(pv => pv.Platforms);
 				pve.Property(pv => pv.Protocols)
 					.HasConversion(ListConverter<string>());
 			});
 		});
 		modelBuilder.Entity<Module>(me =>
 		{
-			me.OwnsMany<ModuleVersion>(m => m.Versions);
+			me.OwnsMany(m => m.Versions);
 			me.Property(m => m.Providers)
 				.HasConversion(ListConverter<string>());
 		});
 	}
 
-	public static ValueConverter<List<T>, string> ListConverter<T>()
-		=> new ValueConverter<List<T>, string>(
-				 v => JsonSerializer.Serialize<List<T>>(v, new JsonSerializerOptions()),
-				 v => JsonSerializer.Deserialize<List<T>>(v, new JsonSerializerOptions()) ?? new List<T>());
+	private static ValueConverter<List<T>, string> ListConverter<T>()
+		=> new(
+			v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
+			v => JsonSerializer.Deserialize<List<T>>(v, new JsonSerializerOptions()) ?? new List<T>());
 
-	private void Builder<T>(ModelBuilder modelBuilder)
+	private static void Builder<T>(ModelBuilder modelBuilder)
 		where T : RegistryItem<T>
 	{
 		modelBuilder.Entity<T>(rie =>

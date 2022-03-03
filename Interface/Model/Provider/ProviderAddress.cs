@@ -1,6 +1,6 @@
 using FluentAssertions;
 
-namespace PurpleDepot.Interface.Model.Provider;
+namespace Interface.Model.Provider;
 public class ProviderAddress : Address<Provider>
 {
 	public ProviderAddress(string @namespace, string name)

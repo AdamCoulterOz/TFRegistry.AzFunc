@@ -1,6 +1,6 @@
-using PurpleDepot.Interface.Model.Module;
+using Interface.Model.Module;
 
-namespace PurpleDepot.Controller.Interfaces;
+namespace Controller.Controller.Interfaces;
 
 public interface IModuleApi
 {
@@ -30,7 +30,7 @@ public interface IModuleApi
 
 	/// <summary>
 	/// Method: <see cref="HttpMethod.Get"/>
-	/// Route: <see cref="ModuleRoutes.Specific"/>
+	/// Route: <see cref="ModuleRoutes.Version"/>
 	/// </summary>
 	Task<HttpResponseMessage> Version(HttpRequestMessage request, string @namespace, string name, string provider, string version);
 

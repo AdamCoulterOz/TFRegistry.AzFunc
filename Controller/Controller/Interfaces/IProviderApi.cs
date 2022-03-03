@@ -1,6 +1,6 @@
-using PurpleDepot.Interface.Model.Provider;
+using Interface.Model.Provider;
 
-namespace PurpleDepot.Controller.Interfaces;
+namespace Controller.Controller.Interfaces;
 
 public interface IProviderApi
 {
@@ -20,7 +20,7 @@ public interface IProviderApi
 	/// Method: <see cref="HttpMethod.Post"/>
 	/// Route: <see cref="ProviderRoutes.Ingest"/>
 	/// </summary>
-	Task<HttpResponseMessage> Ingest(HttpRequestMessage request, string @namespace, string name, string provider, string version);
+	Task<HttpResponseMessage> Ingest(HttpRequestMessage request, string @namespace, string name, string version);
 
 	/// <summary>
 	/// Method: <see cref="HttpMethod.Get"/>
@@ -30,7 +30,7 @@ public interface IProviderApi
 
 	/// <summary>
 	/// Method: <see cref="HttpMethod.Get"/>
-	/// Route: <see cref="ProviderRoutes.Specific"/>
+	/// Route: <see cref="ProviderRoutes.Version"/>
 	/// </summary>
 	Task<HttpResponseMessage> Version(HttpRequestMessage request, string @namespace, string name, string version);
 

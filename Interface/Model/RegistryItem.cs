@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using FluentAssertions;
 
-namespace PurpleDepot.Interface.Model;
+namespace Interface.Model;
 
 public abstract class RegistryItem<T>
 	where T: RegistryItem<T>
@@ -52,7 +52,7 @@ public abstract class RegistryItem<T>
 	{
 		(Id, Owner, Namespace, Name, Description, Source, PublishedAt, LogoUrl) = (id, owner, @namespace, name, description, source, published_at, logo_url);
 
-		GetVersions().Should().NotBeEmpty(because: "all registry items must have at least one version in order to exist");
+		GetVersions().Should().NotBeEmpty("all registry items must have at least one version in order to exist");
 	}
 
 	public bool HasVersion(string version)

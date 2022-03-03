@@ -1,7 +1,7 @@
+using Interface.Model;
 using Microsoft.EntityFrameworkCore;
-using PurpleDepot.Interface.Model;
 
-namespace PurpleDepot.Data;
+namespace Controller.Data;
 
 public class Repository<T> : IRepository<T>
 	where T : RegistryItem<T>
@@ -21,7 +21,7 @@ public class Repository<T> : IRepository<T>
 	public void Add(T item)
 		=> _items.Add(item);
 
-	public bool EnsureCreated()
+	public void EnsureCreated()
 		=> _context.Database.EnsureCreated();
 
 	public void SaveChanges()

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace PurpleDepot.Interface.Model.Provider;
+namespace Interface.Model.Provider;
 public class ProviderPlatform
 {
 	[JsonPropertyName("os")]

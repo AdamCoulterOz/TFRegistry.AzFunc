@@ -1,31 +1,30 @@
+using Controller.Exceptions;
 using Microsoft.Azure.Functions.Worker.Http;
-using PurpleDepot.Controller;
-using PurpleDepot.Controller.Exceptions;
 
-namespace PurpleDepot.Providers.Azure;
+namespace Azure;
 
 public static class HttpMessageShims
 {
-	public static HttpRequestMessage AsRequestMessage(this HttpRequestData request)
+	private static HttpRequestMessage AsRequestMessage(this HttpRequestData request)
 	{
 		var newMessage = new HttpRequestMessage(new HttpMethod(request.Method), request.Url)
 		{
 			Content = new StreamContent(request.Body)
 		};
 		var nonContentHeaders = request.Headers.ToList().Where(header => !header.Key.Contains("Content"));
-		foreach (var nonContentheader in nonContentHeaders)
+		foreach (var (key, value) in nonContentHeaders)
 		{
-			newMessage.Headers.Add(nonContentheader.Key, nonContentheader.Value);
+			newMessage.Headers.Add(key, value);
 		}
 		var contentHeaders = request.Headers.ToList().Where(header => header.Key.Contains("Content"));
-		foreach (var contentHeader in contentHeaders)
+		foreach (var (key, value) in contentHeaders)
 		{
-			newMessage.Content.Headers.Add(contentHeader.Key, contentHeader.Value);
+			newMessage.Content.Headers.Add(key, value);
 		}
 		return newMessage;
 	}
 
-	public static HttpResponseData AsResponseData(this HttpResponseMessage response, HttpRequestData request)
+	private static HttpResponseData AsResponseData(this HttpResponseMessage response, HttpRequestData request)
 	{
 		var newData = request.CreateResponse(response.StatusCode);
 		newData.Body = response.Content.ReadAsStream();

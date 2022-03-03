@@ -1,6 +1,4 @@
-using PurpleDepot.Interface.Routes;
-
-namespace PurpleDepot.Interface.Model.Provider;
+namespace Interface.Model.Provider;
 
 public class ProviderRoutes : IRoutes
 {
@@ -17,6 +15,6 @@ public class ProviderRoutes : IRoutes
 	public const string Download = $"{Common}/download";
 	public const string DownloadVersion = $"{CommonVersion}/download";
 	public const string Latest = $"{Common}";
-	public const string Specific = $"{CommonVersion}";
+	public const string Version = $"{CommonVersion}";
 	public const string Ingest = $"{CommonVersion}/upload";
 }

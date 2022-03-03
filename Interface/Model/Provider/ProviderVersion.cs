@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace PurpleDepot.Interface.Model.Provider;
+namespace Interface.Model.Provider;
 public class ProviderVersion : RegistryItemVersion
 {
 	[JsonPropertyName("protocols")]
@@ -15,5 +15,6 @@ public class ProviderVersion : RegistryItemVersion
 			=> (Protocols, Platforms) = (protocols ?? new List<string>(), platforms ?? new List<ProviderPlatform>());
 
 #nullable disable
-	protected ProviderVersion() : base(){}
+	protected ProviderVersion()
+	{}
 }

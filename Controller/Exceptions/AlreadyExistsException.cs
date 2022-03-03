@@ -1,7 +1,7 @@
 using System.Net;
-using PurpleDepot.Interface.Model;
+using Interface.Model;
 
-namespace PurpleDepot.Controller.Exceptions;
+namespace Controller.Exceptions;
 public class AlreadyExistsException<T> : ItemException<T>
 	where T : RegistryItem<T>
 {
