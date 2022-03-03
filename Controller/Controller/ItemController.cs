@@ -1,7 +1,7 @@
 using System.Net;
 using System.Web;
+using PurpleDepot.Controller.Exceptions;
 using PurpleDepot.Data;
-using PurpleDepot.Interface.Exceptions;
 using PurpleDepot.Interface.Model;
 using PurpleDepot.Interface.Storage;
 
@@ -19,22 +19,23 @@ public class ItemController<T>
 		_storageProvider = storageProvider;
 	}
 
-	public async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, T newItem, Stream stream)
+	public async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, Address<T> newAddress, string version, Stream stream)
 	{
-		var item = await _itemRepo.GetItemAsync(newItem.Address);
+		var item = await _itemRepo.GetItemAsync(newAddress);
 
-		if (item is not null && item.HasVersion(newItem.Version.Version))
-			throw new AlreadyExistsException(item);
+		if (item is not null && item.HasVersion(version))
+			throw new AlreadyExistsException<T>(item.Address, request);
 
 		if (item is null)
 		{
-			item = newItem;
+			item = newAddress.NewItem(version);
 			_itemRepo.Add(item);
 		}
 		else
-			item.AddVersion(newItem.Version);
+			item.AddVersion(version);
 
-		if (await _storageProvider.UploadZipAsync(item.GetFileKey(newItem.Version), stream))
+		var newVersion = item.GetVersion(version)!;
+		if (await _storageProvider.UploadZipAsync(item.GetFileKey(newVersion), stream))
 		{
 			_itemRepo.SaveChanges();
 			return request.CreateResponse(HttpStatusCode.Created);
@@ -43,15 +44,9 @@ public class ItemController<T>
 			return request.CreateStringResponse(HttpStatusCode.BadRequest, "Uploading file failed, and the module was not saved.");
 	}
 
-	public async virtual Task<HttpResponseMessage> VersionsAsync(HttpRequestMessage request, Address<T> itemId)
-		=> request.CreateJsonResponse(await LatestAsync(itemId));
-
-	public async Task<HttpResponseMessage> DownloadAsync(HttpRequestMessage request, Address<T> itemId)
-		=> await DownloadVersionAsync(request, itemId);
-
-	public async Task<HttpResponseMessage> DownloadVersionAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
+	public async Task<HttpResponseMessage> DownloadAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
 	{
-		(var item, var version) = await SpecificAsync(itemId, versionName);
+		(var item, var version) = await GetItemAsync(request, itemId, versionName);
 		var fileKey = item.GetFileKey(version);
 
 		var response = request.CreateResponse(HttpStatusCode.NoContent);
@@ -64,23 +59,18 @@ public class ItemController<T>
 		return response;
 	}
 
-	protected async Task<T> LatestAsync(Address<T> itemId)
-		=> (await SpecificAsync(itemId)).item;
+	public async virtual Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, Address<T> itemId)
+		=> await GetAsync(request, itemId, versionName: null);
 
-	public async Task<HttpResponseMessage> LatestAsync(HttpRequestMessage request, Address<T> itemId)
-		=> request.CreateJsonResponse(await LatestAsync(itemId));
+	public async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
+		=> request.CreateJsonResponse(await GetItemAsync(request, itemId, versionName));
 
-	private async Task<(T item, RegistryItemVersion version)> SpecificAsync(Address<T> itemId, string? versionName = null)
+	protected async Task<(T item, RegistryItemVersion version)> GetItemAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
 	{
 		var item = await _itemRepo.GetItemAsync(itemId);
-		if (item is null)
-			throw new NotFoundException(itemId);
-		var version = item.GetVersion(versionName);
-		if (version is null)
-			throw new NotFoundException(itemId);
+		var version = item?.GetVersion(versionName);
+		if (item is null || version is null)
+			throw (new NotFoundException<T>(itemId, request));
 		return (item, version);
 	}
-
-	public async Task<HttpResponseMessage> VersionAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
-		=> request.CreateJsonResponse(await SpecificAsync(itemId, versionName));
 }

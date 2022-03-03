@@ -6,7 +6,7 @@ public class Provider : RegistryItem<Provider>
 	[JsonPropertyName("alias")]
 	public string? Alias { get; set; }
 
-	public override Address<Provider> Address => (Address<Provider>) GetAddress(Namespace, Name);
+	public override Address<Provider> Address => (Address<Provider>)GetAddress(Namespace, Name);
 
 	public List<ProviderVersion> Versions { get; init; }
 	public override List<RegistryItemVersion> GetVersions() => Versions.ToList<RegistryItemVersion>();
@@ -28,13 +28,18 @@ public class Provider : RegistryItem<Provider>
 	public static Provider New(ProviderAddress id, string version)
 		=> new Provider(id, version);
 
-	protected override void AddSpecificVersion(RegistryItemVersion version)
+	protected override ProviderVersion AddSpecificVersion(RegistryItemVersion version)
 	{
-		if(version is ProviderVersion providerVersion)
+		if (version is ProviderVersion providerVersion)
+		{
 			Versions.Add(providerVersion);
-		else
-			throw new ArgumentException($"{nameof(version)} must be of type {nameof(ProviderVersion)}");
+			return providerVersion;
+		}
+		throw new ArgumentException($"{nameof(version)} must be of type {nameof(ProviderVersion)}");
 	}
+
+	protected override ProviderVersion AddSpecificVersion(string version)
+		=> AddSpecificVersion(new ProviderVersion(version));
 
 #nullable disable
 	protected Provider() : base()

@@ -14,4 +14,7 @@ public class ProviderAddress : Address<Provider>
 		parts.Should().HaveCount(2);
 		return new ProviderAddress(parts[0], parts[1]);
 	}
+
+	public override Provider NewItem(string version)
+		=> Provider.New(this, version);
 }

@@ -1,5 +1,6 @@
 using Microsoft.Azure.Functions.Worker.Http;
 using PurpleDepot.Controller;
+using PurpleDepot.Controller.Exceptions;
 
 namespace PurpleDepot.Providers.Azure;
 

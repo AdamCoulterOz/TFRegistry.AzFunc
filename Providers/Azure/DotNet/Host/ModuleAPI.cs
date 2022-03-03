@@ -6,7 +6,8 @@ using PurpleDepot.Interface.Model.Module;
 using PurpleDepot.Interface.Storage;
 
 namespace PurpleDepot.Providers.Azure.Host;
-public class ModuleApi : ModuleController
+
+public class ModuleApi : ModuleController //IModuleApi
 {
 	public ModuleApi(IRepository<Module> repo, IStorageProvider<Module> storageProvider) : base(repo, storageProvider) { }
 
@@ -14,7 +15,7 @@ public class ModuleApi : ModuleController
 	public async Task<HttpResponseData> Versions(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ModuleRoutes.Versions)]
 			HttpRequestData request, string @namespace, string name, string provider)
-				=> await request.ShimHttp(async (req) => await VersionsAsync(req, new ModuleAddress(@namespace, name, provider)));
+				=> await request.ShimHttp(async (req) => await GetAsync(req, new ModuleAddress(@namespace, name, provider)));
 
 	[Function($"{nameof(ModuleApi)}_{nameof(Download)}")]
 	public async Task<HttpResponseData> Download(
@@ -27,14 +28,14 @@ public class ModuleApi : ModuleController
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ModuleRoutes.DownloadVersion)]
 			HttpRequestData request,
 		string @namespace, string name, string provider, string version)
-			=> await request.ShimHttp(async (req) => await DownloadVersionAsync(req, new ModuleAddress(@namespace, name, provider), version));
+			=> await request.ShimHttp(async (req) => await DownloadAsync(req, new ModuleAddress(@namespace, name, provider), version));
 
 	[Function($"{nameof(ModuleApi)}_{nameof(Latest)}")]
 	public async Task<HttpResponseData> Latest(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ModuleRoutes.Latest)]
 			HttpRequestData request,
 		string @namespace, string name, string provider)
-			=> await request.ShimHttp(async (req) => await LatestAsync(req, new ModuleAddress(@namespace, name, provider)));
+			=> await request.ShimHttp(async (req) => await GetAsync(req, new ModuleAddress(@namespace, name, provider)));
 
 	[Function($"{nameof(ModuleApi)}_{nameof(Version)}")]
 	public async Task<HttpResponseData> Version(
@@ -44,7 +45,7 @@ public class ModuleApi : ModuleController
 	{
 		if (version == "versions")
 			return await Versions(request, @namespace, name, provider);
-		return await request.ShimHttp(async (req) => await VersionAsync(req, new ModuleAddress(@namespace, name, provider), version));
+		return await request.ShimHttp(async (req) => await GetAsync(req, new ModuleAddress(@namespace, name, provider), version));
 	}
 
 	[Function($"{nameof(ModuleApi)}_{nameof(Ingest)}")]
@@ -52,5 +53,5 @@ public class ModuleApi : ModuleController
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = ModuleRoutes.Ingest)]
 			HttpRequestData request,
 		string @namespace, string name, string provider, string version)
-			=> await request.ShimHttp(async (req) => await IngestAsync(req, Module.New(new ModuleAddress(@namespace, name, provider), version), request.Body));
+			=> await request.ShimHttp(async (req) => await IngestAsync(req, new ModuleAddress(@namespace, name, provider), version, request.Body));
 }

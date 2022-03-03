@@ -13,4 +13,6 @@ public abstract class Address<T>
 
 #nullable disable
 	protected Address() { }
+
+	public abstract T NewItem(string version);
 }

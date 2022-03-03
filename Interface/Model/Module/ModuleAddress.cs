@@ -20,6 +20,9 @@ public class ModuleAddress : Address<Module>
 		return new ModuleAddress(parts[0], parts[1], parts[2]);
 	}
 
+	public override Module NewItem(string version)
+		=> Module.New(this, version);
+
 #nullable disable
 	protected ModuleAddress() { }
 }

@@ -1,6 +1,5 @@
 using System.Net;
-
-namespace PurpleDepot.Controller;
+namespace PurpleDepot.Controller.Exceptions;
 public class HttpResponseException : Exception
 {
 	public HttpResponseMessage Response { get; init; }

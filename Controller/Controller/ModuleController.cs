@@ -8,6 +8,6 @@ public class ModuleController : ItemController<Module>
 {
 	public ModuleController(IRepository<Module> itemRepo, IStorageProvider<Module> storageProvider) : base(itemRepo, storageProvider) { }
 
-	public override async Task<HttpResponseMessage> VersionsAsync(HttpRequestMessage request, Address<Module> itemId)
-		=> request.CreateJsonResponse(new ModuleCollection(new List<Module> { (await LatestAsync(itemId)) }));
+	public override async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, Address<Module> itemId)
+		=> request.CreateJsonResponse(new ModuleCollection(new List<Module> { (await GetItemAsync(request, itemId)).item }));
 }

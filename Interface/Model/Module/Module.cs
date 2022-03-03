@@ -25,13 +25,18 @@ public class Module : RegistryItem<Module>
 	public static Module New(ModuleAddress id, string version)
 		=> new Module(id, version);
 
-	protected override void AddSpecificVersion(RegistryItemVersion version)
+	protected override ModuleVersion AddSpecificVersion(RegistryItemVersion version)
 	{
 		if (version is ModuleVersion moduleVersion)
+		{
 			Versions.Add(moduleVersion);
-		else
-			throw new ArgumentException($"{nameof(version)} must be of type {nameof(ModuleVersion)}");
+			return moduleVersion;
+		}
+		throw new ArgumentException($"{nameof(version)} must be of type {nameof(ModuleVersion)}");
 	}
+
+	protected override ModuleVersion AddSpecificVersion(string version)
+		=> AddSpecificVersion(new ModuleVersion(version));
 
 	protected Module(ModuleAddress id, string version)
 	: base(id)

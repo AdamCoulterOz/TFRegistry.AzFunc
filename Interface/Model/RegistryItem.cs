@@ -66,14 +66,22 @@ public abstract class RegistryItem<T>
 		return GetVersions().Where(v => v.Version == version).FirstOrDefault();
 	}
 
-	public void AddVersion(RegistryItemVersion version)
+	public RegistryItemVersion AddVersion(RegistryItemVersion version)
 	{
 		if (GetVersion(version.Version) is not null)
 			throw new Exception("Version already exists");
-		AddSpecificVersion(version);
+		return AddSpecificVersion(version);
 	}
 
-	protected abstract void AddSpecificVersion(RegistryItemVersion version);
+	public RegistryItemVersion AddVersion(string version)
+	{
+		if (GetVersion(version) is not null)
+			throw new Exception("Version already exists");
+		return AddSpecificVersion(version);
+	}
+
+	protected abstract RegistryItemVersion AddSpecificVersion(RegistryItemVersion version);
+	protected abstract RegistryItemVersion AddSpecificVersion(string version);
 
 	public string GetFileKey(RegistryItemVersion? version = null)
 	{
