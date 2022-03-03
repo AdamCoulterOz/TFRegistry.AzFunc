@@ -1,4 +1,4 @@
-resource "azurerm_storage_account" "module_repo" {
+resource "azurerm_storage_account" "repo" {
   name                     = var.instance_name
   resource_group_name      = azurerm_resource_group.instance.name
   location                 = azurerm_resource_group.instance.location
@@ -7,26 +7,15 @@ resource "azurerm_storage_account" "module_repo" {
   allow_blob_public_access = true
 }
 
-resource "azurerm_storage_container" "module_repo" {
-  name                  = "modules"
-  storage_account_name  = azurerm_storage_account.module_repo.name
-  container_access_type = "blob"
-}
-
-resource "azurerm_role_assignment" "controller_storage_access_modules" {
-  scope                = azurerm_storage_container.module_repo.resource_manager_id
+resource "azurerm_role_assignment" "controller_storage_access" {
+  scope                = azurerm_storage_account.repo.id
   role_definition_name = "Storage Blob Data Owner"
   principal_id         = azurerm_function_app.app.identity[0].principal_id
 }
 
-resource "azurerm_storage_container" "provider_repo" {
-  name                  = "providers"
-  storage_account_name  = azurerm_storage_account.module_repo.name
+resource "azurerm_storage_container" "modules" {
+  name                  = "registry"
+  storage_account_name  = azurerm_storage_account.repo.name
   container_access_type = "blob"
 }
 
-resource "azurerm_role_assignment" "controller_storage_access_providers" {
-  scope                = azurerm_storage_container.provider_repo.resource_manager_id
-  role_definition_name = "Storage Blob Data Owner"
-  principal_id         = azurerm_function_app.app.identity[0].principal_id
-}

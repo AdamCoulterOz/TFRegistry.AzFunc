@@ -42,9 +42,8 @@ resource "azurerm_function_app" "app" {
     AzureWebJobsStorage__accountName                          = azurerm_storage_account.app_storage.name
     FUNCTIONS_WORKER_RUNTIME                                  = "dotnet-isolated"
     PurpleDepot__Provider                                     = "Azure"
-    PurpleDepot__AzureStorageOptions__BlobEndpointUrl         = azurerm_storage_account.module_repo.primary_blob_endpoint
-    PurpleDepot__AzureStorageOptions__ModuleContainer         = azurerm_storage_container.module_repo.name
-    PurpleDepot__AzureStorageOptions__ProviderContainer       = azurerm_storage_container.provider_repo.name
+    PurpleDepot__AzureStorageOptions__StorageAccountName      = azurerm_storage_account.repo.name
+    PurpleDepot__AzureStorageOptions__BlobContainerName       = "registry"
     PurpleDepot__AzureDatabaseOptions__CosmosConnectionString = azurerm_cosmosdb_account.db.connection_strings[0]
   }
 
@@ -53,9 +52,9 @@ resource "azurerm_function_app" "app" {
   }
 
   auth_settings {
-    enabled                        = true
-    issuer                         = "https://sts.windows.net/${data.azuread_client_config.current.tenant_id}/"
-    unauthenticated_client_action  = "RedirectToLoginPage"
+    enabled                       = true
+    issuer                        = "https://sts.windows.net/${data.azuread_client_config.current.tenant_id}/"
+    unauthenticated_client_action = "RedirectToLoginPage"
     active_directory {
       client_id         = azuread_application.terraform.application_id
       allowed_audiences = var.url != null ? [var.url] : null
