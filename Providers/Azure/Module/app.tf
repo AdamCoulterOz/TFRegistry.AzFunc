@@ -4,8 +4,8 @@ resource "random_uuid" "app_role_contributor_id" {}
 
 resource "azuread_application" "terraform" {
   display_name     = "Terraform"
-  identifier_uris  = [var.url]
-  owners           = [var.owner_id]
+  identifier_uris  = var.url != null ? [var.url] : []
+  owners           = var.owner_id != null ? [var.owner_id] : []
   sign_in_audience = "AzureADMyOrg"
   api {
     oauth2_permission_scope {
@@ -43,8 +43,8 @@ resource "azuread_application" "terraform" {
     }
   }
   web {
-    homepage_url  = var.url
-    redirect_uris = ["${var.url}/.auth/login/aad/callback"]
+    homepage_url  = var.url != null ? var.url : null
+    redirect_uris = var.url != null ? ["${var.url}/.auth/login/aad/callback"] : []
     implicit_grant {
       access_token_issuance_enabled = true
       id_token_issuance_enabled     = true

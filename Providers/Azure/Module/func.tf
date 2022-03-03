@@ -58,7 +58,7 @@ resource "azurerm_function_app" "app" {
     unauthenticated_client_action  = "RedirectToLoginPage"
     active_directory {
       client_id         = azuread_application.terraform.application_id
-      allowed_audiences = [var.url]
+      allowed_audiences = var.url != null ? [var.url] : null
     }
   }
 }

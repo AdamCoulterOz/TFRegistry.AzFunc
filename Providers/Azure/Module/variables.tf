@@ -16,11 +16,12 @@ variable "cosmos_location" {
 
 variable "url" {
   type = string
-#   example = "https://terraform.mycompany.com"
+  #   example = "https://terraform.mycompany.com"
+  default = null
 }
 
 # GUID of app owner (defaults to creator if not set)
 variable "owner_id" {
-    type = string
-    default = null
+  type    = string
+  default = null
 }
