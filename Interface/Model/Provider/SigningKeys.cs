@@ -11,5 +11,6 @@ public class SigningKeys
 	public SigningKeys(List<GpgPublicKey> gpg_public_keys)
 		=> GpgPublicKeys = gpg_public_keys;
 
+#nullable disable
 	protected SigningKeys() { }
 }

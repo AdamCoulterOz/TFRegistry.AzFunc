@@ -20,5 +20,7 @@ public abstract class Address
 			return Comparer.Equals(this, item.Address);
 		throw new Exception($"{item.GetType().Name} is not compatible with {GetType().Name}");
 	}
+
+#nullable disable
 	protected Address() { }
 }

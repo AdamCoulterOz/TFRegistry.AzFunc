@@ -47,5 +47,6 @@ public class Module : RegistryItem
 		: base(id, @namespace, name, published_at, owner, description, source, logo_url)
 			=> (Provider, Providers, Versions) = (provider, providers, versions);
 
+#nullable disable
 	protected Module() : base() { }
 }

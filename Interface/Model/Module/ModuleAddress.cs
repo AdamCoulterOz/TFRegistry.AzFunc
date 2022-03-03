@@ -12,7 +12,6 @@ public class ModuleAddress : Address
 	public override string ToString()
 		=> $"{base.ToString()}/{Provider}";
 
-	protected ModuleAddress() { }
 
 	internal static ModuleAddress Parse(string value)
 	{
@@ -23,4 +22,7 @@ public class ModuleAddress : Address
 
 	public override bool ItemIsValidType<T>(T item)
 		=> (item as Module) != null;
+
+#nullable disable
+	protected ModuleAddress() { }
 }

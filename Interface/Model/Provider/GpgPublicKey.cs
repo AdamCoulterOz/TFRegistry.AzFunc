@@ -22,5 +22,6 @@ public class GpgPublicKey
 	public GpgPublicKey(string key_id, string ascii_armor, string? trust_signature = null, string? source = null, Uri? source_url = null)
 		=> (KeyId, AsciiArmor, TrustSignature, Source, SourceUrl) = (key_id, ascii_armor, trust_signature, source, source_url);
 
+#nullable disable
 	protected GpgPublicKey() { }
 }

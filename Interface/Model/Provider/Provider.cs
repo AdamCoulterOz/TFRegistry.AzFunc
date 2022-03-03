@@ -36,6 +36,7 @@ public class Provider : RegistryItem
 			throw new ArgumentException($"{nameof(version)} must be of type {nameof(ProviderVersion)}");
 	}
 
+#nullable disable
 	protected Provider() : base()
 	{ }
 }

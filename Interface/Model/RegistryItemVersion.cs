@@ -37,5 +37,7 @@ public class RegistryItemVersion : SemanticVersion
 	private static SemanticVersion ToSemVer(string version)
 		=> SemanticVersion.Parse(version);
 
+
+#nullable disable
 	protected RegistryItemVersion() : base(null, null, null) { }
 }

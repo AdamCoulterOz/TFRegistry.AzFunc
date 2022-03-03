@@ -14,5 +14,6 @@ public class ProviderVersion : RegistryItemVersion
 		: base(version)
 			=> (Protocols, Platforms) = (protocols ?? new List<string>(), platforms ?? new List<ProviderPlatform>());
 
+#nullable disable
 	protected ProviderVersion() : base(){}
 }

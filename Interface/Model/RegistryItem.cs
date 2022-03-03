@@ -81,5 +81,6 @@ public abstract class RegistryItem
 		return $"{Address}/{version.Key}-{version.Version}.zip";
 	}
 
+#nullable disable
 	protected RegistryItem() { }
 }

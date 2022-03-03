@@ -13,5 +13,6 @@ public class ProviderPlatform
 	public ProviderPlatform(string os, string arch)
 		=> (OS, Arch) = (os, arch);
 
+#nullable disable
 	protected ProviderPlatform() { }
 }
