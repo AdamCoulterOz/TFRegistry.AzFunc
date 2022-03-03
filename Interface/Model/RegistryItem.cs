@@ -3,35 +3,33 @@ using FluentAssertions;
 
 namespace PurpleDepot.Interface.Model;
 
-public abstract class RegistryItem<V> : IRegistryItem
-	where V : RegistryItemVersion
+public abstract class RegistryItem
 {
-	public Address Id => Address;
-
-	[JsonPropertyName("owner")]
-	public string Owner { get; set; }
+	[JsonPropertyName("id")]
+	public string Id { get; init; }
 
 	[JsonPropertyName("namespace")]
-	public string Namespace { get; set; }
+	public string Namespace { get; init; }
 
 	[JsonPropertyName("name")]
-	public string Name { get; set; }
+	public string Name { get; init; }
+
+	public abstract List<RegistryItemVersion> GetVersions();
 
 	/// <summary>Latest version</summary>
-	public V Version => Versions.Max()!;
-	RegistryItemVersion IRegistryItem.Version => Version;
+	public RegistryItemVersion Version => GetVersions().Max()!;
+
+	[JsonPropertyName("owner")]
+	public string? Owner { get; set; }
 
 	[JsonPropertyName("description")]
 	public string? Description { get; set; }
 
 	[JsonPropertyName("source")]
-	public Uri Source { get; set; }
+	public Uri? Source { get; set; }
 
 	[JsonPropertyName("published_at")]
-	public DateTime PublishedAt { get; set; }
-
-	[JsonPropertyName("versions")]
-	public virtual List<V> Versions { get; set; }
+	public DateTime PublishedAt { get; init; }
 
 	[JsonPropertyName("logo_url")]
 	public Uri? LogoUrl { get; set; }
@@ -39,37 +37,49 @@ public abstract class RegistryItem<V> : IRegistryItem
 	[JsonIgnore]
 	public abstract Address Address { get; }
 
+	protected RegistryItem(Address id)
+		: this(
+			id.ToString(),
+			id.Namespace,
+			id.Name,
+			DateTime.UtcNow)
+	{ }
+
 	[JsonConstructor]
-	public RegistryItem(string owner, string @namespace, string name, Uri source, DateTime published_at, List<V> versions, string? description = null, Uri? logo_url = null)
+	public RegistryItem(string id, string @namespace, string name, DateTime published_at,
+		string? owner = null, string? description = null, Uri? source = null, Uri? logo_url = null)
 	{
-		(Owner, Namespace, Name, Description, Source, PublishedAt, Versions, LogoUrl) = (owner, @namespace, name, description, source, published_at, versions, logo_url);
-		Versions.Should().NotBeEmpty(because: "all registry items must have at least one version in order to exist");
+		(Id, Owner, Namespace, Name, Description, Source, PublishedAt, LogoUrl) = (id, owner, @namespace, name, description, source, published_at, logo_url);
+
+		GetVersions().Should().NotBeEmpty(because: "all registry items must have at least one version in order to exist");
 	}
 
 	public bool HasVersion(string version)
 		=> GetVersion(version) is not null;
 
 	/// <summary>Gets specific version</summary>
-	public V? GetVersion(string? version = null)
+	public RegistryItemVersion? GetVersion(string? version = null)
 	{
-		if(version is null)
+		if (version is null)
 			return Version;
-		return Versions.Where(v => v.Version == version).FirstOrDefault();
+		return GetVersions().Where(v => v.Version == version).FirstOrDefault();
 	}
-	RegistryItemVersion? IRegistryItem.GetVersion(string? version) => GetVersion(version);
 
-	public void AddVersion(V version)
+	public void AddVersion(RegistryItemVersion version)
 	{
 		if (GetVersion(version.Version) is not null)
 			throw new Exception("Version already exists");
-		Versions.Add(version);
+		AddSpecificVersion(version);
 	}
-	void IRegistryItem.AddVersion(RegistryItemVersion version) => AddVersion((V)version);
+
+	protected abstract void AddSpecificVersion(RegistryItemVersion version);
 
 	public string GetFileKey(RegistryItemVersion? version = null)
 	{
-		if(version is null)
+		if (version is null)
 			version = Version;
 		return $"{Address}/{version.Key}-{version.Version}.zip";
 	}
+
+	protected RegistryItem() { }
 }

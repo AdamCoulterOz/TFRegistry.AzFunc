@@ -6,52 +6,53 @@ using PurpleDepot.Data;
 using PurpleDepot.Interface.Storage;
 using PurpleDepot.Providers.Azure.Storage;
 using PurpleDepot.Providers.Azure.Database;
+using PurpleDepot.Interface.Model;
 
-namespace PurpleDepot.Providers.Azure
+namespace PurpleDepot.Providers.Azure;
+public class Program
 {
-	public class Program
+	const string AppName = nameof(PurpleDepot);
+	public static void Main()
 	{
-		const string AppName = nameof(PurpleDepot);
-		public static void Main()
+		var host = new HostBuilder()
+			.ConfigureFunctionsWorkerDefaults()
+			.ConfigureServices(ConfigureServices)
+			.Build();
+
+		host.Run();
+	}
+
+	static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+	{
+		context.Configuration = new ConfigurationBuilder()
+								.AddEnvironmentVariables(AppName)
+								.Build();
+
+		string service = context.Configuration.GetValue<string>("Provider");
+		switch (service)
 		{
-			var host = new HostBuilder()
-				.ConfigureFunctionsWorkerDefaults()
-				.ConfigureServices(ConfigureServices)
-				.Build();
-
-			host.Run();
+			case "Azure": AzureServices(context, services); break;
+			default: DevServices(context, services); break;
 		}
+		services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+	}
 
-		static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
-		{
-			context.Configuration = new ConfigurationBuilder()
-									.AddEnvironmentVariables(AppName)
-									.Build();
+	static void DevServices(HostBuilderContext _, IServiceCollection services)
+	{
+		services.AddScoped(typeof(IStorageProvider<>), typeof(MockStorageService<>));
+		services.AddDbContext<Data.AppContext>(options => options.UseInMemoryDatabase(AppName));
+	}
 
-			string service = context.Configuration.GetValue<string>("Provider");
-			switch(service)
-			{
-				case "Azure": AzureServices(context, services); break;
-				default: DevServices(context, services); break;
-			}
-		}
+	static void AzureServices(HostBuilderContext context, IServiceCollection services)
+	{
+		services.Configure<AzureStorageOptions>(
+			context.Configuration.GetSection(nameof(AzureStorageOptions)));
 
-		static void DevServices(HostBuilderContext _, IServiceCollection services)
-		{
-			services.AddTransient<IStorageProvider, MockStorageService>();
-			services.AddDbContext<ModuleContext>(options => options.UseInMemoryDatabase(AppName));
-		}
+		services.AddTransient(typeof(IStorageProvider<>), typeof(AzureStorageService<>));
+		services.AddDbContext<Data.AppContext>(options => options.UseCosmos(
+			connectionString: context.Configuration.GetOptions<AzureDatabaseOptions>().CosmosConnectionString,
+			databaseName: AppName
+		));
 
-		static void AzureServices(HostBuilderContext context, IServiceCollection services)
-		{
-			services.Configure<AzureStorageOptions>(
-				context.Configuration.GetSection(nameof(AzureStorageOptions)));
-
-			services.AddTransient<IStorageProvider, AzureStorageService>();
-			services.AddDbContext<ModuleContext>(options => options.UseCosmos(
-				connectionString: context.Configuration.GetOptions<AzureDatabaseOptions>().CosmosConnectionString,
-				databaseName: AppName
-			));
-		}
 	}
 }

@@ -12,4 +12,6 @@ public class ProviderPlatform
 	[JsonConstructor]
 	public ProviderPlatform(string os, string arch)
 		=> (OS, Arch) = (os, arch);
+
+	protected ProviderPlatform() { }
 }

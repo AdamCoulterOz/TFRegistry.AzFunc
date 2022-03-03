@@ -6,21 +6,22 @@ using PurpleDepot.Interface.Model;
 using PurpleDepot.Interface.Storage;
 
 namespace PurpleDepot.Controller;
-public class ItemController<T> where T : class, IRegistryItem
+public class ItemController<RI>
+	where RI : RegistryItem
 {
-	protected readonly ItemContext<T> _itemContext;
-	protected readonly IStorageProvider<T> _storageProvider;
+	protected readonly IRepository<RI> _itemRepo;
+	protected readonly IStorageProvider<RI> _storageProvider;
 
-	public ItemController(ItemContext<T> itemContext, IStorageProvider<T> storageProvider)
+	public ItemController(IRepository<RI> itemRepo, IStorageProvider<RI> storageProvider)
 	{
-		_itemContext = itemContext;
-		_itemContext.Database.EnsureCreated();
+		_itemRepo = itemRepo;
+		_itemRepo.EnsureCreated();
 		_storageProvider = storageProvider;
 	}
 
-	public async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, T newItem, Stream stream)
+	public async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, RI newItem, Stream stream)
 	{
-		var item = await _itemContext.GetItemAsync(newItem.Id);
+		var item = await _itemRepo.GetItemAsync(newItem.Address);
 
 		if (item is not null && item.HasVersion(newItem.Version.Version))
 			throw new AlreadyExistsException(item);
@@ -28,14 +29,14 @@ public class ItemController<T> where T : class, IRegistryItem
 		if (item is null)
 		{
 			item = newItem;
-			_itemContext.Add(item);
+			_itemRepo.Add(item);
 		}
 		else
 			item.AddVersion(newItem.Version);
 
 		if (await _storageProvider.UploadZipAsync(item.GetFileKey(newItem.Version), stream))
 		{
-			_itemContext.SaveChanges();
+			_itemRepo.SaveChanges();
 			return request.CreateResponse(HttpStatusCode.Created);
 		}
 		else
@@ -46,9 +47,9 @@ public class ItemController<T> where T : class, IRegistryItem
 		=> request.CreateJsonResponse(await LatestAsync(itemId));
 
 	public async Task<HttpResponseMessage> DownloadAsync(HttpRequestMessage request, Address itemId)
-		=> await DownloadSpecificAsync(request, itemId);
+		=> await DownloadVersionAsync(request, itemId);
 
-	public async Task<HttpResponseMessage> DownloadSpecificAsync(HttpRequestMessage request, Address itemId, string? versionName = null)
+	public async Task<HttpResponseMessage> DownloadVersionAsync(HttpRequestMessage request, Address itemId, string? versionName = null)
 	{
 		(var item, var version) = await SpecificAsync(itemId, versionName);
 		var fileKey = item.GetFileKey(version);
@@ -63,12 +64,15 @@ public class ItemController<T> where T : class, IRegistryItem
 		return response;
 	}
 
-	public async Task<T> LatestAsync(Address itemId)
+	protected async Task<RI> LatestAsync(Address itemId)
 		=> (await SpecificAsync(itemId)).item;
 
-	public async Task<(T item, RegistryItemVersion version)> SpecificAsync(Address itemId, string? versionName = null)
+	public async Task<HttpResponseMessage> LatestAsync(HttpRequestMessage request, Address itemId)
+		=> request.CreateJsonResponse(await LatestAsync(itemId));
+
+	private async Task<(RI item, RegistryItemVersion version)> SpecificAsync(Address itemId, string? versionName = null)
 	{
-		var item = await _itemContext.GetItemAsync(itemId);
+		var item = await _itemRepo.GetItemAsync(itemId);
 		if (item is null)
 			throw new NotFoundException(itemId);
 		var version = item.GetVersion(versionName);
@@ -76,4 +80,7 @@ public class ItemController<T> where T : class, IRegistryItem
 			throw new NotFoundException(itemId);
 		return (item, version);
 	}
+
+	public async Task<HttpResponseMessage> VersionAsync(HttpRequestMessage request, Address itemId, string? versionName = null)
+		=> request.CreateJsonResponse(await SpecificAsync(itemId, versionName));
 }

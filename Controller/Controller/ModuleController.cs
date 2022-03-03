@@ -6,7 +6,7 @@ using PurpleDepot.Interface.Storage;
 namespace PurpleDepot.Controller;
 public class ModuleController : ItemController<Module>
 {
-	public ModuleController(ItemContext<Module> itemContext, IStorageProvider<Module> storageProvider) : base(itemContext, storageProvider) { }
+	public ModuleController(IRepository<Module> itemRepo, IStorageProvider<Module> storageProvider) : base(itemRepo, storageProvider) { }
 
 	public override async Task<HttpResponseMessage> VersionsAsync(HttpRequestMessage request, Address itemId)
 		=> request.CreateJsonResponse(new ModuleCollection(new List<Module> { (await LatestAsync(itemId)) }));

@@ -19,7 +19,8 @@ public class GpgPublicKey
 	public Uri? SourceUrl { get; set; }
 
 	[JsonConstructor]
-	public GpgPublicKey(string keyId, string asciiArmor, string? trustSignature = null, string? source = null, Uri? sourceUrl = null)
-		=> (KeyId, AsciiArmor, TrustSignature, Source, SourceUrl) = (keyId, asciiArmor, trustSignature, source, sourceUrl);
+	public GpgPublicKey(string key_id, string ascii_armor, string? trust_signature = null, string? source = null, Uri? source_url = null)
+		=> (KeyId, AsciiArmor, TrustSignature, Source, SourceUrl) = (key_id, ascii_armor, trust_signature, source, source_url);
 
+	protected GpgPublicKey() { }
 }

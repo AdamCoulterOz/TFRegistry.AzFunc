@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using SemVersion;
 
 namespace PurpleDepot.Interface.Model;
+
 public class RegistryItemVersion : SemanticVersion
 {
 	[JsonPropertyName("version")]
@@ -12,10 +13,10 @@ public class RegistryItemVersion : SemanticVersion
 	public Guid Key { get; set; }
 
 	[JsonConstructor]
-	public RegistryItemVersion(string version, Guid key): base(GetMajor(version), GetMinor(version), GetPatch(version), GetPrerelease(version), GetBuild(version))
+	public RegistryItemVersion(string version, Guid key) : base(GetMajor(version), GetMinor(version), GetPatch(version), GetPrerelease(version), GetBuild(version))
 		=> (Version, Key) = (version, key);
 
-	public RegistryItemVersion(string version): base(GetMajor(version), GetMinor(version), GetPatch(version), GetPrerelease(version), GetBuild(version))
+	public RegistryItemVersion(string version) : base(GetMajor(version), GetMinor(version), GetPatch(version), GetPrerelease(version), GetBuild(version))
 		=> (Version, Key) = (version, Guid.NewGuid());
 
 	private static int? GetMajor(string version)
@@ -35,4 +36,6 @@ public class RegistryItemVersion : SemanticVersion
 
 	private static SemanticVersion ToSemVer(string version)
 		=> SemanticVersion.Parse(version);
+
+	protected RegistryItemVersion() : base(null, null, null) { }
 }

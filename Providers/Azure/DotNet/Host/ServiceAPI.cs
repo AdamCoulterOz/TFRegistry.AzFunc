@@ -2,22 +2,11 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using PurpleDepot.Controller;
 
-namespace PurpleDepot.Providers.Azure.Host
+namespace PurpleDepot.Providers.Azure.Host;
+public class ServiceApi : ServiceController
 {
-	public class ServiceAPI : ServiceController
-	{
-		[Function(nameof(ServiceDiscovery))]
-		public static HttpResponseData ServiceDiscovery(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ".well-known/terraform.json")] HttpRequestData request)
-		{
-			try
-			{
-				return ServiceDiscovery(request.AsRequestMessage()).AsResponseData(request);
-			}
-			catch (HttpResponseException re)
-			{
-				return re.Response.AsResponseData(request);
-			}
-		}
-	}
+	[Function(nameof(ServiceDiscoveryAsync))]
+	public static async Task<HttpResponseData> ServiceDiscoveryAsync(
+		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ".well-known/terraform.json")] HttpRequestData request)
+			=> await request.ShimHttp(async (req) => await ServiceDiscovery(req));
 }
