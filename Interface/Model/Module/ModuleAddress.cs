@@ -2,7 +2,7 @@ using FluentAssertions;
 
 namespace PurpleDepot.Interface.Model.Module;
 
-public class ModuleAddress : Address
+public class ModuleAddress : Address<Module>
 {
 	public string Provider { get; init; }
 
@@ -19,9 +19,6 @@ public class ModuleAddress : Address
 		parts.Should().HaveCount(3);
 		return new ModuleAddress(parts[0], parts[1], parts[2]);
 	}
-
-	public override bool ItemIsValidType<T>(T item)
-		=> (item as Module) != null;
 
 #nullable disable
 	protected ModuleAddress() { }

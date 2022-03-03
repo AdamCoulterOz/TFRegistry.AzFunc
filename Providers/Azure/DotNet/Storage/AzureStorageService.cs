@@ -8,7 +8,7 @@ using PurpleDepot.Interface.Model;
 
 namespace PurpleDepot.Providers.Azure.Storage;
 public class AzureStorageService<T> : IStorageProvider<T>
-	where T : RegistryItem
+	where T : RegistryItem<T>
 {
 	private readonly AzureStorageOptions _options;
 

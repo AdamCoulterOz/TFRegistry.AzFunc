@@ -3,7 +3,8 @@ using FluentAssertions;
 
 namespace PurpleDepot.Interface.Model;
 
-public abstract class RegistryItem
+public abstract class RegistryItem<T>
+	where T: RegistryItem<T>
 {
 	[JsonPropertyName("id")]
 	public string Id { get; init; }
@@ -35,9 +36,9 @@ public abstract class RegistryItem
 	public Uri? LogoUrl { get; set; }
 
 	[JsonIgnore]
-	public abstract Address Address { get; }
+	public abstract Address<T> Address { get; }
 
-	protected RegistryItem(Address id)
+	protected RegistryItem(Address<T> id)
 		: this(
 			id.ToString(),
 			id.Namespace,

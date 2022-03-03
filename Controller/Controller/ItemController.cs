@@ -6,20 +6,20 @@ using PurpleDepot.Interface.Model;
 using PurpleDepot.Interface.Storage;
 
 namespace PurpleDepot.Controller;
-public class ItemController<RI>
-	where RI : RegistryItem
+public class ItemController<T>
+	where T : RegistryItem<T>
 {
-	protected readonly IRepository<RI> _itemRepo;
-	protected readonly IStorageProvider<RI> _storageProvider;
+	protected readonly IRepository<T> _itemRepo;
+	protected readonly IStorageProvider<T> _storageProvider;
 
-	public ItemController(IRepository<RI> itemRepo, IStorageProvider<RI> storageProvider)
+	public ItemController(IRepository<T> itemRepo, IStorageProvider<T> storageProvider)
 	{
 		_itemRepo = itemRepo;
 		_itemRepo.EnsureCreated();
 		_storageProvider = storageProvider;
 	}
 
-	public async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, RI newItem, Stream stream)
+	public async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, T newItem, Stream stream)
 	{
 		var item = await _itemRepo.GetItemAsync(newItem.Address);
 
@@ -43,13 +43,13 @@ public class ItemController<RI>
 			return request.CreateStringResponse(HttpStatusCode.BadRequest, "Uploading file failed, and the module was not saved.");
 	}
 
-	public async virtual Task<HttpResponseMessage> VersionsAsync(HttpRequestMessage request, Address itemId)
+	public async virtual Task<HttpResponseMessage> VersionsAsync(HttpRequestMessage request, Address<T> itemId)
 		=> request.CreateJsonResponse(await LatestAsync(itemId));
 
-	public async Task<HttpResponseMessage> DownloadAsync(HttpRequestMessage request, Address itemId)
+	public async Task<HttpResponseMessage> DownloadAsync(HttpRequestMessage request, Address<T> itemId)
 		=> await DownloadVersionAsync(request, itemId);
 
-	public async Task<HttpResponseMessage> DownloadVersionAsync(HttpRequestMessage request, Address itemId, string? versionName = null)
+	public async Task<HttpResponseMessage> DownloadVersionAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
 	{
 		(var item, var version) = await SpecificAsync(itemId, versionName);
 		var fileKey = item.GetFileKey(version);
@@ -64,13 +64,13 @@ public class ItemController<RI>
 		return response;
 	}
 
-	protected async Task<RI> LatestAsync(Address itemId)
+	protected async Task<T> LatestAsync(Address<T> itemId)
 		=> (await SpecificAsync(itemId)).item;
 
-	public async Task<HttpResponseMessage> LatestAsync(HttpRequestMessage request, Address itemId)
+	public async Task<HttpResponseMessage> LatestAsync(HttpRequestMessage request, Address<T> itemId)
 		=> request.CreateJsonResponse(await LatestAsync(itemId));
 
-	private async Task<(RI item, RegistryItemVersion version)> SpecificAsync(Address itemId, string? versionName = null)
+	private async Task<(T item, RegistryItemVersion version)> SpecificAsync(Address<T> itemId, string? versionName = null)
 	{
 		var item = await _itemRepo.GetItemAsync(itemId);
 		if (item is null)
@@ -81,6 +81,6 @@ public class ItemController<RI>
 		return (item, version);
 	}
 
-	public async Task<HttpResponseMessage> VersionAsync(HttpRequestMessage request, Address itemId, string? versionName = null)
+	public async Task<HttpResponseMessage> VersionAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
 		=> request.CreateJsonResponse(await SpecificAsync(itemId, versionName));
 }

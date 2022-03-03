@@ -39,16 +39,16 @@ public class AppContext : DbContext
 				 v => JsonSerializer.Serialize<List<T>>(v, new JsonSerializerOptions()),
 				 v => JsonSerializer.Deserialize<List<T>>(v, new JsonSerializerOptions()) ?? new List<T>());
 
-	private void Builder<RI>(ModelBuilder modelBuilder)
-		where RI : RegistryItem
+	private void Builder<T>(ModelBuilder modelBuilder)
+		where T : RegistryItem<T>
 	{
-		modelBuilder.Entity<RI>(rie =>
+		modelBuilder.Entity<T>(rie =>
 		{
-			rie.HasBaseType<RegistryItem>();
+			rie.HasBaseType<RegistryItem<T>>();
 			rie.Ignore(ri => ri.Address);
 			rie.Ignore(ri => ri.Version);
 
-			modelBuilder.Entity<RegistryItem>(ribe =>
+			modelBuilder.Entity<RegistryItem<T>>(ribe =>
 			{
 				ribe.HasKey(ri => ri.Id);
 				ribe.HasIndex(ri => ri.Id)

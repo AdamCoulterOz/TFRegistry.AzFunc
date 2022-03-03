@@ -3,7 +3,8 @@ using PurpleDepot.Interface.Model;
 
 namespace PurpleDepot.Data;
 
-public class Repository<T> : IRepository<T> where T : RegistryItem
+public class Repository<T> : IRepository<T>
+	where T : RegistryItem<T>
 {
 	private readonly AppContext _context;
 	private readonly DbSet<T> _items;
@@ -14,8 +15,8 @@ public class Repository<T> : IRepository<T> where T : RegistryItem
 		_items = _context.Set<T>();
 	}
 
-	public async Task<T?> GetItemAsync(Address itemId)
-		=> await _items.Where(item => itemId.MatchesItem<T>(item)).FirstOrDefaultAsync();
+	public async Task<T?> GetItemAsync(Address<T> itemId)
+		=> await _items.Where(item => item.Id == itemId.ToString()).FirstOrDefaultAsync();
 
 	public void Add(T item)
 		=> _items.Add(item);

@@ -1,7 +1,7 @@
 using FluentAssertions;
 
 namespace PurpleDepot.Interface.Model.Provider;
-public class ProviderAddress : Address
+public class ProviderAddress : Address<Provider>
 {
 	public ProviderAddress(string @namespace, string name)
 		: base(@namespace, name) { }
@@ -14,7 +14,4 @@ public class ProviderAddress : Address
 		parts.Should().HaveCount(2);
 		return new ProviderAddress(parts[0], parts[1]);
 	}
-
-	public override bool ItemIsValidType<T>(T item)
-		=> (item as Provider) != null;
 }
