@@ -1,6 +1,6 @@
 resource "azurerm_cosmosdb_account" "db" {
   name                = var.instance_name
-  location            = var.cosmos_location
+  location            = var.location
   resource_group_name = azurerm_resource_group.instance.name
   offer_type          = "Standard"
   kind                = "GlobalDocumentDB"
@@ -8,7 +8,7 @@ resource "azurerm_cosmosdb_account" "db" {
   enable_automatic_failover = true
 
   geo_location {
-    location          = var.cosmos_location
+    location          = var.location
     failover_priority = 0
   }
 

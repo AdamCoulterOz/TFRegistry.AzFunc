@@ -9,42 +9,54 @@ resource "azurerm_storage_account" "app_storage" {
 resource "azurerm_role_assignment" "func_app_access_to_storage" {
   scope                = azurerm_storage_account.app_storage.id
   role_definition_name = "Storage Blob Data Owner"
-  principal_id         = azurerm_function_app.app.identity[0].principal_id
+  principal_id         = azurerm_linux_function_app.app.identity[0].principal_id
 }
 
-resource "azurerm_app_service_plan" "app_plan" {
+resource "azurerm_service_plan" "app_plan" {
   name                = var.instance_name
   location            = azurerm_resource_group.instance.location
   resource_group_name = azurerm_resource_group.instance.name
-  kind                = "functionapp"
-  reserved            = true
-
-  sku {
-    tier = "Dynamic"
-    size = "Y1"
-  }
+  os_type             = "Linux"
+  sku_name            = "Y1"
 }
 
 data "azuread_client_config" "current" {}
 
-resource "azurerm_function_app" "app" {
-  name                       = var.instance_name
-  location                   = azurerm_resource_group.instance.location
-  resource_group_name        = azurerm_resource_group.instance.name
-  app_service_plan_id        = azurerm_app_service_plan.app_plan.id
-  storage_account_name       = azurerm_storage_account.app_storage.name
-  storage_account_access_key = azurerm_storage_account.app_storage.primary_access_key
-  os_type                    = "linux"
-  https_only                 = true
-  version                    = "~4"
+resource "azurerm_application_insights" "monitor" {
+  name                = var.instance_name
+  location            = azurerm_resource_group.instance.location
+  resource_group_name = azurerm_resource_group.instance.name
+  application_type    = "web"
+}
 
+resource "azurerm_linux_function_app" "app" {
+  name                          = var.instance_name
+  location                      = azurerm_resource_group.instance.location
+  resource_group_name           = azurerm_resource_group.instance.name
+  storage_account_name          = azurerm_storage_account.app_storage.name
+  service_plan_id               = azurerm_service_plan.app_plan.id
+  storage_uses_managed_identity = true
+  https_only                    = true
+  functions_extension_version   = "~4"
   app_settings = {
-    AzureWebJobsStorage__accountName                          = azurerm_storage_account.app_storage.name
-    FUNCTIONS_WORKER_RUNTIME                                  = "dotnet-isolated"
-    PurpleDepot__Provider                                     = "Azure"
-    PurpleDepot__AzureStorageOptions__StorageAccountName      = azurerm_storage_account.repo.name
-    PurpleDepot__AzureStorageOptions__BlobContainerName       = "registry"
-    PurpleDepot__AzureDatabaseOptions__CosmosConnectionString = azurerm_cosmosdb_account.db.connection_strings[0]
+    FUNCTIONS_WORKER_RUNTIME          = "dotnet-isolated"
+    PurpleDepot__Storage__Account     = azurerm_storage_account.repo.name
+    PurpleDepot__Storage__Container   = azurerm_storage_container.registry.name
+    PurpleDepot__Database__Connection = azurerm_cosmosdb_account.db.connection_strings[0]
+    PurpleDepot__Database__Name       = "PurpleDepot"
+    MySecret                          = ""
+  }
+
+  site_config {
+    application_insights_key               = azurerm_application_insights.monitor.instrumentation_key
+    application_insights_connection_string = azurerm_application_insights.monitor.connection_string
+    # application_stack {
+    #   dotnet_version = "6"
+    # }
+    app_service_logs {
+      disk_quota_mb         = 25
+      retention_period_days = 3
+    }
   }
 
   identity {
@@ -56,8 +68,9 @@ resource "azurerm_function_app" "app" {
     issuer                        = "https://sts.windows.net/${data.azuread_client_config.current.tenant_id}/"
     unauthenticated_client_action = "RedirectToLoginPage"
     active_directory {
-      client_id         = azuread_application.terraform.application_id
-      allowed_audiences = var.url != null ? [var.url] : null
+      client_id                  = azuread_application.terraform.application_id
+      allowed_audiences          = var.url != null ? [var.url] : null
+      client_secret_setting_name = "MySecret"
     }
   }
 }

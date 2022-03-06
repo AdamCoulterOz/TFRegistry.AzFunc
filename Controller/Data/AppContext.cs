@@ -3,6 +3,7 @@ using Interface.Model;
 using Interface.Model.Module;
 using Interface.Model.Provider;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Controller.Data;
@@ -23,16 +24,26 @@ public class AppContext : DbContext
 			{
 				pve.OwnsMany(pv => pv.Platforms);
 				pve.Property(pv => pv.Protocols)
-					.HasConversion(ListConverter<string>());
+					.HasConversion(ListConverter<string>(), ListComparer<string>());
 			});
 		});
 		modelBuilder.Entity<Module>(me =>
 		{
 			me.OwnsMany(m => m.Versions);
 			me.Property(m => m.Providers)
-				.HasConversion(ListConverter<string>());
+				.HasConversion(ListConverter<string>(), ListComparer<string>());
 		});
 	}
+
+	private ValueComparer ListComparer<T>() where T : notnull
+		=> new ValueComparer<List<T>>(
+			(first, second)
+				=> first != null && second != null
+					? first.SequenceEqual(second)
+					: first == null && second == null
+						? true : false,
+			c => c.Aggregate(0, (accumulate, value) => HashCode.Combine(accumulate, value.GetHashCode())),
+			c => c.ToList());
 
 	private static ValueConverter<List<T>, string> ListConverter<T>()
 		=> new(

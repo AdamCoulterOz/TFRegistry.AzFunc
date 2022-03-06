@@ -10,10 +10,6 @@ variable "location" {
   type = string
 }
 
-variable "cosmos_location" {
-  type = string
-}
-
 variable "url" {
   type = string
   #   example = "https://terraform.mycompany.com"

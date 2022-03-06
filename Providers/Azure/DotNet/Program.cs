@@ -1,4 +1,4 @@
-using Azure.Database;
+using Azure.Options;
 using Azure.Storage;
 using Controller.Data;
 using Interface.Storage;
@@ -12,8 +12,7 @@ namespace Azure;
 
 public static class Program
 {
-	private const string AppName = "PurpleDepot";
-
+	private const string OptionsRoot = "PurpleDepot";
 	public static void Main()
 	{
 		var host = new HostBuilder()
@@ -26,35 +25,19 @@ public static class Program
 
 	private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
 	{
-		context.Configuration = new ConfigurationBuilder()
-								.AddEnvironmentVariables(AppName)
-								.Build();
+		var config = context.Configuration.GetSection(OptionsRoot).Get<AzureOptions>();
 
-		services.AddOptions<AzureStorageOptions>()
-				.Configure(options => context.Configuration.GetSection(nameof(AzureStorageOptions)).Bind(options));
-
-		services.AddOptions<AzureDatabaseOptions>()
-				.Configure(options => context.Configuration.GetSection(nameof(AzureDatabaseOptions)).Bind(options));
-
-		context.Configuration.AsEnumerable().ToList().ForEach(x => Console.WriteLine($"{x.Key} = {x.Value}"));
-
-		var service = context.Configuration.GetValue<string>("Provider");
-		Console.WriteLine($"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{service}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		switch (service)
+		if (config.Development)
 		{
-			case "Azure":
-				var storageOptions = context.Configuration.GetOptions<AzureStorageOptions>();
-				Console.WriteLine(storageOptions.BlobClientUrl);
-				services.AddTransient(typeof(IStorageProvider<>), typeof(AzureStorageService<>));
-
-				var dbOptions = context.Configuration.GetOptions<AzureDatabaseOptions>();
-				services.AddDbContext<AppContext>(options => options.UseCosmos(dbOptions.CosmosConnectionString, databaseName: AppName));
-
-				break;
-			default:
-				services.AddScoped(typeof(IStorageProvider<>), typeof(MockStorageService<>));
-				services.AddDbContext<AppContext>(options => options.UseInMemoryDatabase(AppName));
-				break;
+			services.AddScoped(typeof(IStorageProvider<>), typeof(MockStorageService<>));
+			services.AddDbContext<AppContext>(options => options.UseInMemoryDatabase(config.Database.Name));
+		}
+		else
+		{
+			services.AddOptions<StorageOptions>().Bind(context.Configuration.GetSection($"{OptionsRoot}:Storage"));
+			services.AddOptions<StorageOptions>().Configure(options => options = config.Storage);
+			services.AddTransient(typeof(IStorageProvider<>), typeof(AzureStorageService<>));
+			services.AddDbContext<AppContext>(options => options.UseCosmos(config.Database.Connection, databaseName: config.Database.Name));
 		}
 
 		services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

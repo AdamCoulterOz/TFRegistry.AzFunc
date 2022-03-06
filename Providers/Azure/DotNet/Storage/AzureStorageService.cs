@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Azure.Options;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Interface.Model;
@@ -10,14 +11,14 @@ namespace Azure.Storage;
 public class AzureStorageService<T> : IStorageProvider<T>
 	where T : RegistryItem<T>
 {
-	private readonly AzureStorageOptions _options;
+	private readonly StorageOptions _options;
 
-	public AzureStorageService(IOptions<AzureStorageOptions> options)
+	public AzureStorageService(IOptions<StorageOptions> options)
 		=> _options = options.Value;
 
 	private BlobClient GetBlobClient(string fileKey)
 	{
-		NameValidator.ValidateContainerName(_options.BlobContainerName);
+		NameValidator.ValidateContainerName(_options.Container);
 		NameValidator.ValidateBlobName(fileKey);
 
 		var credOptions = new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true };
