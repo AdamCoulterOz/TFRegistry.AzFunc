@@ -1,3 +1,9 @@
+variable "app_name" {
+  type        = string
+  description = "The name of the application, you may want to call it '{Organisation Name} Terraform'"
+  default     = "Terraform"
+}
+
 variable "instance_name" {
   type = string
 }

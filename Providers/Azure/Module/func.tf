@@ -20,8 +20,6 @@ resource "azurerm_service_plan" "app_plan" {
   sku_name            = "Y1"
 }
 
-data "azuread_client_config" "current" {}
-
 resource "azurerm_application_insights" "monitor" {
   name                = var.instance_name
   location            = azurerm_resource_group.instance.location
@@ -65,11 +63,12 @@ resource "azurerm_linux_function_app" "app" {
 
   auth_settings {
     enabled                       = true
+    token_store_enabled           = true
     issuer                        = "https://sts.windows.net/${data.azuread_client_config.current.tenant_id}/"
     unauthenticated_client_action = "RedirectToLoginPage"
     active_directory {
       client_id                  = azuread_application.terraform.application_id
-      allowed_audiences          = var.url != null ? [var.url] : null
+      allowed_audiences          = var.url != null ? [var.url] : [local.token_audience]
       client_secret_setting_name = "MySecret"
     }
   }
