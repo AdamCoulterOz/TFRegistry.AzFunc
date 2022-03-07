@@ -1,7 +1,7 @@
 $env:ARM_THREEPOINTZERO_BETA_RESOURCES="true"
 
-terraform init
-terraform apply -auto-approve
+terraform -chdir=Module init
+terraform -chdir=Module apply -auto-approve
 
 $tenantId = (terraform -chdir=Module output -raw tenantId)
 $clientId = (terraform -chdir=Module output -raw clientId)
@@ -18,3 +18,5 @@ $token = (Get-AzAccessToken -ResourceUrl $registryAuth -TenantId $tenantId).Toke
 
 $secureToken = $token | ConvertTo-SecureString -AsPlainText -Force
 Invoke-RestMethod -Uri "$registryUrl/v1/modules/adam/server/azure" -Method GET -Authentication OAuth -Token $secureToken
+
+terraform -chdir=Module destroy -auto-approve
