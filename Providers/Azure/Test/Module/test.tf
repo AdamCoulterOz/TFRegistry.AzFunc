@@ -3,6 +3,16 @@ provider "azurerm" {
   features {}
 }
 
+terraform {
+  backend "azurerm" {}
+  required_providers {
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~>2.18"
+    }
+  }
+}
+
 module "infra" {
   source              = "../../Module"
   app_name            = "Test Terraform"
@@ -41,6 +51,6 @@ resource "azuread_application_password" "tester_password" {
 }
 
 resource "azuread_service_principal" "tester" {
-  application_id               = azuread_application.tester.application_id
-  owners                       = [data.azuread_client_config.current.object_id]
+  application_id = azuread_application.tester.application_id
+  owners         = [data.azuread_client_config.current.object_id]
 }
