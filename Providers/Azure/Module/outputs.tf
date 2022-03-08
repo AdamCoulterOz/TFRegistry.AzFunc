@@ -21,3 +21,7 @@ output "terraform_app_object_id" {
 output "terraform_app_application_id" {
   value = azuread_application.terraform.application_id
 }
+
+output "api_contributor_role_name" {
+  value = local.contributorRoleValue
+}

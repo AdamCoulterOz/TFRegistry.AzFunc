@@ -5,6 +5,7 @@ resource "random_uuid" "app_role_contributor_id" {}
 
 locals {
   token_audience = "api://${azuread_application.terraform.application_id}"
+  contributorRoleValue = "Terraform.Module.Contributor"
 }
 
 data "azuread_client_config" "current" {}
@@ -36,7 +37,7 @@ resource "azuread_application" "terraform" {
   }
   app_role {
     id                   = random_uuid.app_role_contributor_id.result
-    value                = "Terraform.Module.Contributor"
+    value                = local.contributorRoleValue
     display_name         = "Terraform Module Contributor"
     description          = "Read and write terraform modules in the registry"
     allowed_member_types = ["Application", "User"]
