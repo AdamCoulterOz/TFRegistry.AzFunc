@@ -3,7 +3,7 @@ output "url" {
 }
 
 output "auth_url" {
-  value = "api://${azuread_application.terraform.application_id}"
+  value = azuread_application.terraform.application_id
 }
 
 output "api_reader_role_id" {
