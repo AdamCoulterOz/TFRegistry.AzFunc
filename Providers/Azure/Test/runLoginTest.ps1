@@ -1,3 +1,5 @@
+Install-Module -Name Az.Account -Scope CurrentUser -Repository PSGallery -Force
+
 $env:ARM_THREEPOINTZERO_BETA_RESOURCES="true"
 $env:ARM_CLIENT_ID=$env:servicePrincipalId
 $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
