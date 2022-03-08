@@ -1,27 +1,11 @@
 Install-Module -Name Az.Accounts -Scope CurrentUser -Repository PSGallery -Force
 
-$env:ARM_THREEPOINTZERO_BETA_RESOURCES="true"
-$env:ARM_CLIENT_ID=$env:servicePrincipalId
-$env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
-$env:ARM_TENANT_ID=$env:tenantId
+$secureClientSecret = $env:clientSecret | ConvertTo-SecureString -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ($env:clientId, $secureClientSecret)
 
-terraform -chdir=Module init
-terraform -chdir=Module apply -auto-approve
+Connect-AzAccount -ServicePrincipal -Credential $credential -Tenant $env:tenantId
 
-$tenantId = (terraform -chdir=Module output -raw tenantId)
-$clientId = (terraform -chdir=Module output -raw clientId)
-$clientSecret = (terraform -chdir=Module output -raw clientSecret)
-$registryAuth = (terraform -chdir=Module output -raw registryAuth)
-$registryUrl = (terraform -chdir=Module output -raw registryUrl)
-
-$secureClientSecret = $clientSecret | ConvertTo-SecureString -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ($clientId, $secureClientSecret)
-
-Connect-AzAccount -ServicePrincipal -Credential $credential -Tenant $tenantId
-
-$token = (Get-AzAccessToken -ResourceUrl $registryAuth -TenantId $tenantId).Token
+$token = (Get-AzAccessToken -ResourceUrl $env:registryAuth -TenantId $tenantId).Token
 
 $secureToken = $token | ConvertTo-SecureString -AsPlainText -Force
-Invoke-RestMethod -Uri "$registryUrl/v1/modules/adam/server/azure" -Method GET -Authentication OAuth -Token $secureToken
-
-terraform -chdir=Module destroy -auto-approve
+Invoke-RestMethod -Uri "$env:registryUrl/v1/modules/adam/server/azure" -Method GET -Authentication OAuth -Token $secureToken
