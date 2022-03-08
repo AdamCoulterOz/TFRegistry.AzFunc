@@ -6,14 +6,6 @@ output "clientId" {
   value = azuread_application.tester.application_id
 }
 
-output "apiAppId" {
-  value = module.infra.terraform_app_application_id
-}
-
-output "apiAppContributorRoleName" {
-  value = module.infra.api_contributor_role_name
-}
-
 output "clientSecret" {
   value     = azuread_application_password.tester_password.value
   sensitive = true
@@ -25,4 +17,16 @@ output "registryAuth" {
 
 output "registryUrl" {
   value = module.infra.url
+}
+
+output "sp_objectId" {
+  value = azuread_service_principal.tester.object_id
+}
+
+output "terraform_sp_object_id" {
+  value = module.infra.terraform_sp_object_id
+}
+
+output "api_contributor_role_id" {
+  value = module.infra.api_contributor_role_id
 }

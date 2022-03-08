@@ -14,14 +14,10 @@ output "api_contributor_role_id" {
   value = random_uuid.app_role_contributor_id.result
 }
 
-output "terraform_app_object_id" {
-  value = azuread_application.terraform.object_id
+output "terraform_sp_object_id" {
+  value = azuread_service_principal.terraform.object_id
 }
 
 output "terraform_app_application_id" {
   value = azuread_application.terraform.application_id
-}
-
-output "api_contributor_role_name" {
-  value = local.contributorRoleValue
 }
