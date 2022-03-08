@@ -18,15 +18,3 @@ output "registryAuth" {
 output "registryUrl" {
   value = module.infra.url
 }
-
-output "sp_objectId" {
-  value = azuread_service_principal.tester.object_id
-}
-
-output "terraform_sp_object_id" {
-  value = module.infra.terraform_sp_object_id
-}
-
-output "api_contributor_role_id" {
-  value = module.infra.api_contributor_role_id
-}

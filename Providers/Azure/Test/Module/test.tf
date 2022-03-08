@@ -54,3 +54,9 @@ resource "azuread_service_principal" "tester" {
   application_id = azuread_application.tester.application_id
   owners         = [data.azuread_client_config.current.object_id]
 }
+
+resource "azuread_app_role_assignment" "tester_tfcontibutor" {
+  app_role_id         = module.infra.api_contributor_role_id
+  principal_object_id = azuread_service_principal.tester.object_id
+  resource_object_id  = module.infra.terraform_sp_object_id
+}
