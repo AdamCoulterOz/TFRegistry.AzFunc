@@ -1,4 +1,7 @@
 $env:ARM_THREEPOINTZERO_BETA_RESOURCES="true"
+$env:ARM_CLIENT_ID=$env:servicePrincipalId
+$env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
+$env:ARM_TENANT_ID=$env:tenantId
 
 terraform -chdir=Module init
 terraform -chdir=Module apply -auto-approve
