@@ -37,9 +37,15 @@ public class ItemController<T>
 			item.AddVersion(version);
 
 		var newVersion = item.GetVersion(version)!;
-		if (!await _storageProvider.UploadZipAsync(item.GetFileKey(newVersion), stream))
-			return request.CreateStringResponse(HttpStatusCode.BadRequest,
-				"Uploading file failed, and the module was not saved.");
+		try
+		{
+			await _storageProvider.UploadZipAsync(item.GetFileKey(newVersion), stream);
+		}
+		catch(Exception e)
+		{
+			throw new HttpResponseException(request, HttpStatusCode.InternalServerError, $"Uploading file failed, and the module was not saved. Inner error: {e.Message}");
+		}
+
 		_itemRepo.SaveChanges();
 		return request.CreateResponse(HttpStatusCode.Created);
 	}
@@ -62,7 +68,7 @@ public class ItemController<T>
 
 	protected virtual async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
 		=> request.CreateJsonResponse(await GetItemAsync(request, itemId, versionName));
-	
+
 	protected async Task<(T item, RegistryItemVersion version)> GetItemAsync(HttpRequestMessage request,
 		Address<T> itemId, string? versionName = null)
 	{

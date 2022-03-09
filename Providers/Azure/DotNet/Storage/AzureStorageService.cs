@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Interface.Model;
 using Interface.Storage;
+using Interface.Storage.Exceptions;
 using Microsoft.Azure.Storage;
 using Microsoft.Extensions.Options;
 
@@ -39,7 +40,7 @@ public class AzureStorageService<T> : IStorageProvider<T>
 		return (download.Content, download.ContentLength);
 	}
 
-	public async Task<bool> UploadZipAsync(string fileKey, Stream stream)
+	public async Task UploadZipAsync(string fileKey, Stream stream)
 	{
 		var client = GetBlobClient(fileKey);
 		var header = new BlobHttpHeaders { ContentType = "application/zip" };
@@ -47,10 +48,10 @@ public class AzureStorageService<T> : IStorageProvider<T>
 		stream.Close();
 
 		var properties = (await client.GetPropertiesAsync()).Value;
-		if (properties.ContentLength >= 0)
-			return true;
-
-		await client.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots);
-		return false;
+		if (properties.ContentLength == 0)
+		{
+			await client.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots);
+			throw new FileEmpty(fileKey);
+		}
 	}
 }
