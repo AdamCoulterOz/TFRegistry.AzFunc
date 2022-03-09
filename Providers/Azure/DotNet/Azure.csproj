@@ -33,7 +33,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../../Controller/Controller.csproj" />
-    <ProjectReference Include="../../../Interface/Interface.csproj" />
+    <ProjectReference Include="../../../Core/Core.csproj" />
   </ItemGroup>
 </Project>
