@@ -8,4 +8,4 @@ Connect-AzAccount -ServicePrincipal -Credential $credential -Tenant $env:tenantI
 $token = (Get-AzAccessToken -ResourceUrl $env:registryAuth -TenantId $tenantId).Token
 
 $secureToken = $token | ConvertTo-SecureString -AsPlainText -Force
-Invoke-RestMethod -Uri "$env:registryUrl/v1/modules/adam/server/azure" -Method GET -Authentication OAuth -Token $secureToken
+Invoke-RestMethod -Uri "$env:registryUrl/.well-known/terraform.json" -Method GET -Authentication OAuth -Token $secureToken

@@ -1,5 +1,6 @@
 using Controller.Controller;
 using Interface.Model;
+using Interface.Model.Service;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 

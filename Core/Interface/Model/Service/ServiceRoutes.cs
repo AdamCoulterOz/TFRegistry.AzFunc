@@ -1,4 +1,4 @@
-namespace Interface.Model;
+namespace Interface.Model.Service;
 
 public static class ServiceRoutes
 {
