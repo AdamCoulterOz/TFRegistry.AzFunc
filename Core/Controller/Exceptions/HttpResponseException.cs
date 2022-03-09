@@ -1,5 +1,5 @@
 using System.Net;
-using Controller.Controller;
+using Controller;
 
 namespace Controller.Exceptions;
 public class HttpResponseException : Exception

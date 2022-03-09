@@ -1,4 +1,4 @@
-using Controller.Controller;
+using Controller;
 using Interface.Model;
 using Interface.Model.Service;
 using Microsoft.Azure.Functions.Worker;

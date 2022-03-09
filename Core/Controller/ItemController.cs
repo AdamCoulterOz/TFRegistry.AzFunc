@@ -5,7 +5,7 @@ using Controller.Exceptions;
 using Interface.Model;
 using Interface.Storage;
 
-namespace Controller.Controller;
+namespace Controller;
 
 public class ItemController<T>
 	where T : RegistryItem<T>

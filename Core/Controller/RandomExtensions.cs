@@ -1,4 +1,4 @@
-namespace Controller.Controller;
+namespace Controller;
 
 public static class RandomExtensions
 {

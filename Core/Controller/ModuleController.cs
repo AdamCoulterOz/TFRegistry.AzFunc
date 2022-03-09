@@ -3,7 +3,7 @@ using Interface.Model;
 using Interface.Model.Module;
 using Interface.Storage;
 
-namespace Controller.Controller;
+namespace Controller;
 
 public class ModuleController : ItemController<Module>
 {

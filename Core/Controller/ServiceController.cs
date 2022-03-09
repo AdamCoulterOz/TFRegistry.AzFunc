@@ -1,6 +1,6 @@
 using Interface.Model;
 
-namespace Controller.Controller;
+namespace Controller;
 public class ServiceController
 {
 	private static readonly Dictionary<string, string> Services;
