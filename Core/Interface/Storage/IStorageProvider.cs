@@ -1,7 +1,7 @@
-using Interface.Model;
-using Interface.Storage.Exceptions;
+using PurpleDepot.Core.Interface.Model;
+using PurpleDepot.Core.Interface.Storage.Exceptions;
 
-namespace Interface.Storage;
+namespace PurpleDepot.Core.Interface.Storage;
 public interface IStorageProvider<T>
 	where T : RegistryItem<T>
 {

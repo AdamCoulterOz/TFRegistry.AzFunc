@@ -1,6 +1,6 @@
-using Interface.Model.Module;
+using PurpleDepot.Core.Interface.Model.Module;
 
-namespace Controller.Controller.Interfaces;
+namespace PurpleDepot.Core.Controller.Controller.Interfaces;
 
 public interface IModuleApi
 {

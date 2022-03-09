@@ -1,11 +1,11 @@
 using System.Net;
 using System.Web;
-using Controller.Data;
-using Controller.Exceptions;
-using Interface.Model;
-using Interface.Storage;
+using PurpleDepot.Core.Controller.Data;
+using PurpleDepot.Core.Controller.Exceptions;
+using PurpleDepot.Core.Interface.Model;
+using PurpleDepot.Core.Interface.Storage;
 
-namespace Controller;
+namespace PurpleDepot.Core.Controller;
 
 public class ItemController<T>
 	where T : RegistryItem<T>

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Interface.Model.Provider;
+namespace PurpleDepot.Core.Interface.Model.Provider;
 public class ProviderVersion : RegistryItemVersion
 {
 	[JsonPropertyName("protocols")]

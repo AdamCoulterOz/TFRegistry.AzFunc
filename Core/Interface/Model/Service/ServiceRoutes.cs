@@ -1,4 +1,4 @@
-namespace Interface.Model.Service;
+namespace PurpleDepot.Core.Interface.Model.Service;
 
 public static class ServiceRoutes
 {

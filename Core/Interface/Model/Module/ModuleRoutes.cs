@@ -1,4 +1,4 @@
-namespace Interface.Model.Module;
+namespace PurpleDepot.Core.Interface.Model.Module;
 
 public class ModuleRoutes : IRoutes
 {

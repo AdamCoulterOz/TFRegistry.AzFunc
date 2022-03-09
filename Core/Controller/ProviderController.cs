@@ -1,8 +1,8 @@
-using Controller.Data;
-using Interface.Model.Provider;
-using Interface.Storage;
+using PurpleDepot.Core.Controller.Data;
+using PurpleDepot.Core.Interface.Model.Provider;
+using PurpleDepot.Core.Interface.Storage;
 
-namespace Controller;
+namespace PurpleDepot.Core.Controller;
 public class ProviderController : ItemController<Provider>
 {
 	protected ProviderController(IRepository<Provider> itemRepo, IStorageProvider<Provider> storageProvider) : base(itemRepo, storageProvider) { }

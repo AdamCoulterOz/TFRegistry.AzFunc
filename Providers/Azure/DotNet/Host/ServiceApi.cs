@@ -1,10 +1,9 @@
-using Controller;
-using Interface.Model;
-using Interface.Model.Service;
+using PurpleDepot.Core.Controller;
+using PurpleDepot.Core.Interface.Model.Service;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace Azure.Host;
+namespace PurpleDepot.Providers.Azure.Host;
 
 public class ServiceApi : ServiceController //IServiceApi
 {

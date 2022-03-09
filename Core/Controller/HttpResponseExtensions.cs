@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 
-namespace Controller;
+namespace PurpleDepot.Core.Controller;
 public static class HttpResponseExtensions
 {
 	public static HttpResponseMessage CreateResponse(this HttpRequestMessage request, HttpStatusCode statusCode)

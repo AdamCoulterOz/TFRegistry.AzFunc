@@ -1,4 +1,4 @@
-namespace Controller;
+namespace PurpleDepot.Core.Controller;
 
 public static class RandomExtensions
 {

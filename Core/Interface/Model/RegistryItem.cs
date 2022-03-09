@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using FluentAssertions;
 
-namespace Interface.Model;
+namespace PurpleDepot.Core.Interface.Model;
 
 public abstract class RegistryItem<T>
 	where T: RegistryItem<T>

@@ -1,7 +1,7 @@
-using Controller.Exceptions;
+using PurpleDepot.Core.Controller.Exceptions;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace Azure;
+namespace PurpleDepot.Providers.Azure;
 
 public static class HttpMessageShims
 {

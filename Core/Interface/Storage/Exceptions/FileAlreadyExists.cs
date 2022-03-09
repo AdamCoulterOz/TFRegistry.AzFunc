@@ -1,4 +1,4 @@
-namespace Interface.Storage.Exceptions;
+namespace PurpleDepot.Core.Interface.Storage.Exceptions;
 
 public class FileAlreadyExists : FileException
 {

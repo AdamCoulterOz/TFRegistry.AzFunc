@@ -1,7 +1,7 @@
-using Interface.Model;
+using PurpleDepot.Core.Interface.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace Controller.Data;
+namespace PurpleDepot.Core.Controller.Data;
 
 public class Repository<T> : IRepository<T>
 	where T : RegistryItem<T>

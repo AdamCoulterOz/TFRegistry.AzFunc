@@ -1,11 +1,11 @@
-using Controller;
-using Controller.Data;
-using Interface.Model.Provider;
-using Interface.Storage;
+using PurpleDepot.Core.Controller;
+using PurpleDepot.Core.Controller.Data;
+using PurpleDepot.Core.Interface.Model.Provider;
+using PurpleDepot.Core.Interface.Storage;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace Azure.Host;
+namespace PurpleDepot.Providers.Azure.Host;
 
 public class ProviderApi : ProviderController //IProviderApi
 {

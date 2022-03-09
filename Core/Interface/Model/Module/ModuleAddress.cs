@@ -1,6 +1,6 @@
 using FluentAssertions;
 
-namespace Interface.Model.Module;
+namespace PurpleDepot.Core.Interface.Model.Module;
 
 public class ModuleAddress : Address<Module>
 {

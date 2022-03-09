@@ -1,8 +1,8 @@
 using System.Text;
-using Interface.Model;
-using Interface.Storage.Exceptions;
+using PurpleDepot.Core.Interface.Model;
+using PurpleDepot.Core.Interface.Storage.Exceptions;
 
-namespace Interface.Storage;
+namespace PurpleDepot.Core.Interface.Storage;
 public class MockStorageService<T> : IStorageProvider<T> where T: RegistryItem<T>
 {
 	private static readonly Dictionary<string, string> _files = new();

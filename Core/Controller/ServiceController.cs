@@ -1,6 +1,6 @@
-using Interface.Model;
+using PurpleDepot.Core.Interface.Model;
 
-namespace Controller;
+namespace PurpleDepot.Core.Controller;
 public class ServiceController
 {
 	private static readonly Dictionary<string, string> Services;

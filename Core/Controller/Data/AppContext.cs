@@ -1,12 +1,12 @@
 using System.Text.Json;
-using Interface.Model;
-using Interface.Model.Module;
-using Interface.Model.Provider;
+using PurpleDepot.Core.Interface.Model;
+using PurpleDepot.Core.Interface.Model.Module;
+using PurpleDepot.Core.Interface.Model.Provider;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Controller.Data;
+namespace PurpleDepot.Core.Controller.Data;
 public class AppContext : DbContext
 {
 	public AppContext(DbContextOptions<AppContext> options) : base(options) { }

@@ -1,14 +1,14 @@
 using Azure.Identity;
-using Azure.Options;
+using PurpleDepot.Providers.Azure.Options;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Interface.Model;
-using Interface.Storage;
-using Interface.Storage.Exceptions;
+using PurpleDepot.Core.Interface.Model;
+using PurpleDepot.Core.Interface.Storage;
+using PurpleDepot.Core.Interface.Storage.Exceptions;
 using Microsoft.Azure.Storage;
 using Microsoft.Extensions.Options;
 
-namespace Azure.Storage;
+namespace PurpleDepot.Providers.Azure.Storage;
 public class AzureStorageService<T> : IStorageProvider<T>
 	where T : RegistryItem<T>
 {

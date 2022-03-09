@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Interface.Model.Module;
+namespace PurpleDepot.Core.Interface.Model.Module;
 public class Module : RegistryItem<Module>
 {
 	[JsonPropertyName("provider")]

@@ -1,4 +1,4 @@
-namespace Azure.Options;
+namespace PurpleDepot.Providers.Azure.Options;
 
 public class AzureOptions
 {

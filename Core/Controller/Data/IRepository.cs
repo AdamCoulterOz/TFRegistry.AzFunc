@@ -1,6 +1,6 @@
-using Interface.Model;
+using PurpleDepot.Core.Interface.Model;
 
-namespace Controller.Data;
+namespace PurpleDepot.Core.Controller.Data;
 
 public interface IRepository<T>
 	where T : RegistryItem<T>

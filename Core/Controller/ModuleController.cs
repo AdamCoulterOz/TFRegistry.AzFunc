@@ -1,9 +1,9 @@
-using Controller.Data;
-using Interface.Model;
-using Interface.Model.Module;
-using Interface.Storage;
+using PurpleDepot.Core.Controller.Data;
+using PurpleDepot.Core.Interface.Model;
+using PurpleDepot.Core.Interface.Model.Module;
+using PurpleDepot.Core.Interface.Storage;
 
-namespace Controller;
+namespace PurpleDepot.Core.Controller;
 
 public class ModuleController : ItemController<Module>
 {

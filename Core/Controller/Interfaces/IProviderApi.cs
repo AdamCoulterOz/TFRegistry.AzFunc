@@ -1,6 +1,6 @@
-using Interface.Model.Provider;
+using PurpleDepot.Core.Interface.Model.Provider;
 
-namespace Controller.Controller.Interfaces;
+namespace PurpleDepot.Core.Controller.Controller.Interfaces;
 
 public interface IProviderApi
 {

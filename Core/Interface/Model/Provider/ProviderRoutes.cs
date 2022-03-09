@@ -1,4 +1,4 @@
-namespace Interface.Model.Provider;
+namespace PurpleDepot.Core.Interface.Model.Provider;
 
 public class ProviderRoutes : IRoutes
 {

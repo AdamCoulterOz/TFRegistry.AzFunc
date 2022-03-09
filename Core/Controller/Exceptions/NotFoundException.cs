@@ -1,7 +1,7 @@
 using System.Net;
-using Interface.Model;
+using PurpleDepot.Core.Interface.Model;
 
-namespace Controller.Exceptions;
+namespace PurpleDepot.Core.Controller.Exceptions;
 public class NotFoundException<T> : ItemException<T>
 	where T : RegistryItem<T>
 {

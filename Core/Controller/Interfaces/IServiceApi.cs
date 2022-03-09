@@ -1,6 +1,6 @@
-using Interface.Model;
+using PurpleDepot.Core.Interface.Model;
 
-namespace Controller.Controller.Interfaces;
+namespace PurpleDepot.Core.Controller.Controller.Interfaces;
 
 public interface IServiceApi
 {

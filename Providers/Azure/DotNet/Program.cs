@@ -1,14 +1,14 @@
-using Azure.Options;
-using Azure.Storage;
-using Controller.Data;
-using Interface.Storage;
+using PurpleDepot.Providers.Azure.Options;
+using PurpleDepot.Providers.Azure.Storage;
+using PurpleDepot.Core.Controller.Data;
+using PurpleDepot.Core.Interface.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using AppContext = Controller.Data.AppContext;
+using AppContext = PurpleDepot.Core.Controller.Data.AppContext;
 
-namespace Azure;
+namespace PurpleDepot.Providers.Azure;
 
 public static class Program
 {

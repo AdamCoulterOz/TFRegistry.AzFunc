@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using SemVersion;
 
-namespace Interface.Model;
+namespace PurpleDepot.Core.Interface.Model;
 
 public class RegistryItemVersion : SemanticVersion
 {
