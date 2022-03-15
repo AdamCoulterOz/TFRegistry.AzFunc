@@ -42,6 +42,7 @@ resource "azurerm_linux_function_app" "app" {
     PurpleDepot__Storage__Container   = azurerm_storage_container.registry.name
     PurpleDepot__Database__Connection = azurerm_cosmosdb_account.db.connection_strings[0]
     PurpleDepot__Database__Name       = "PurpleDepot"
+    AzureWebJobsStorage               = azurerm_storage_account.app_storage.primary_connection_string
   }
 
   site_config {
@@ -66,8 +67,8 @@ resource "azurerm_linux_function_app" "app" {
     issuer                        = "https://sts.windows.net/${data.azuread_client_config.current.tenant_id}/"
     unauthenticated_client_action = "RedirectToLoginPage"
     active_directory {
-      client_id                  = azuread_application.terraform.application_id
-      allowed_audiences          = var.url != null ? [var.url] : [local.token_audience]
+      client_id         = azuread_application.terraform.application_id
+      allowed_audiences = var.url != null ? [var.url] : [local.token_audience]
     }
   }
 }
