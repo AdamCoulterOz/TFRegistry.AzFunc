@@ -1,48 +1,36 @@
 using PurpleDepot.Core.Controller.Exceptions;
 using Microsoft.Azure.Functions.Worker.Http;
+using PurpleDepot.Core.Controller;
 
 namespace PurpleDepot.Providers.Azure;
 
-public static class HttpMessageShims
+public static class ResponseWrapper
 {
-	private static HttpRequestMessage AsRequestMessage(this HttpRequestData request)
+	private static async Task<HttpResponseData> AsResponseDataAsync(this ControllerResult result, HttpRequestData request)
 	{
-		var newMessage = new HttpRequestMessage(new HttpMethod(request.Method), request.Url)
+		var response = request.CreateResponse(result.StatusCode);
+		response.Headers = new HttpHeadersCollection(result.EnumerableHeaders);
+
+		var writeTask = result.Content switch
 		{
-			Content = new StreamContent(request.Body)
+			null => response.WriteStringAsync(string.Empty),
+			string content => response.WriteStringAsync(content),
+			not null => response.WriteAsJsonAsync(result.Content).AsTask(),
 		};
-		var nonContentHeaders = request.Headers.ToList().Where(header => !header.Key.Contains("Content"));
-		foreach (var (key, value) in nonContentHeaders)
-		{
-			newMessage.Headers.Add(key, value);
-		}
-		var contentHeaders = request.Headers.ToList().Where(header => header.Key.Contains("Content"));
-		foreach (var (key, value) in contentHeaders)
-		{
-			newMessage.Content.Headers.Add(key, value);
-		}
-		return newMessage;
+		await writeTask;
+		return response;
 	}
 
-	private static HttpResponseData AsResponseData(this HttpResponseMessage response, HttpRequestData request)
-	{
-		var newData = request.CreateResponse(response.StatusCode);
-		newData.Body = response.Content.ReadAsStream();
-		var headers = response.Headers.ToList();
-		headers.AddRange(response.Content.Headers.ToList());
-		newData.Headers = new HttpHeadersCollection(headers);
-		return newData;
-	}
-
-	public static async Task<HttpResponseData> ShimHttp(this HttpRequestData request, Func<HttpRequestMessage, Task<HttpResponseMessage>> controllerFunc)
+	public static async Task<HttpResponseData> CreateResponseAsync(this HttpRequestData request, Func<Task<ControllerResult>> controllerFunc)
 	{
 		try
 		{
-			return (await controllerFunc(request.AsRequestMessage())).AsResponseData(request);
+			var result = await controllerFunc();
+			return await result.AsResponseDataAsync(request);
 		}
 		catch (HttpResponseException re)
 		{
-			return re.Response.AsResponseData(request);
+			return await re.Response.AsResponseDataAsync(request);
 		}
 	}
 }

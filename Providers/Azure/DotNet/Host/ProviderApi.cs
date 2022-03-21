@@ -7,7 +7,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 
 namespace PurpleDepot.Providers.Azure.Host;
 
-public class ProviderApi : ProviderController //IProviderApi
+public class ProviderApi : ProviderController
 {
 	public ProviderApi(IRepository<Provider> repo, IStorageProvider<Provider> storageProvider) : base(repo, storageProvider) { }
 
@@ -15,25 +15,25 @@ public class ProviderApi : ProviderController //IProviderApi
 	public async Task<HttpResponseData> Versions(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ProviderRoutes.Versions)]
 			HttpRequestData request, string @namespace, string name)
-				=> await request.ShimHttp(async req => await GetAsync(req, new ProviderAddress(@namespace, name)));
+				=> await request.CreateResponseAsync(async () => await GetAsync(new ProviderAddress(@namespace, name)));
 
 	[Function($"{nameof(ProviderApi)}_{nameof(Download)}")]
 	public async Task<HttpResponseData> Download(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ProviderRoutes.Download)]
 			HttpRequestData request, string @namespace, string name)
-				=> await request.ShimHttp(async req => await DownloadAsync(req, new ProviderAddress(@namespace, name)));
+				=> await request.CreateResponseAsync(async () => await DownloadAsync(new ProviderAddress(@namespace, name)));
 
 	[Function($"{nameof(ProviderApi)}_{nameof(DownloadVersion)}")]
 	public async Task<HttpResponseData> DownloadVersion(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ProviderRoutes.DownloadVersion)]
 			HttpRequestData request, string @namespace, string name, string version)
-			=> await request.ShimHttp(async req => await DownloadAsync(req, new ProviderAddress(@namespace, name), version));
+			=> await request.CreateResponseAsync(async () => await DownloadAsync(new ProviderAddress(@namespace, name), version));
 
 	[Function($"{nameof(ProviderApi)}_{nameof(Latest)}")]
 	public async Task<HttpResponseData> Latest(
 		[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = ProviderRoutes.Latest)]
 			HttpRequestData request, string @namespace, string name)
-			=> await request.ShimHttp(async req => await GetAsync(req, new ProviderAddress(@namespace, name)));
+			=> await request.CreateResponseAsync(async () => await GetAsync(new ProviderAddress(@namespace, name)));
 
 	[Function($"{nameof(ProviderApi)}_{nameof(Version)}")]
 	public async Task<HttpResponseData> Version(
@@ -43,7 +43,7 @@ public class ProviderApi : ProviderController //IProviderApi
 	{
 		if (version == "versions")
 			return await Versions(request, @namespace, name);
-		return await request.ShimHttp(async req => await GetAsync(req, new ProviderAddress(@namespace, name), version));
+		return await request.CreateResponseAsync(async () => await GetAsync(new ProviderAddress(@namespace, name), version));
 	}
 
 	[Function($"{nameof(ProviderApi)}_{nameof(Ingest)}")]
@@ -51,5 +51,5 @@ public class ProviderApi : ProviderController //IProviderApi
 		[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = ProviderRoutes.Ingest)]
 			HttpRequestData request,
 		string @namespace, string name, string version)
-			=> await request.ShimHttp(async req => await IngestAsync(req, new ProviderAddress(@namespace, name), version, request.Body));
+			=> await request.CreateResponseAsync(async () => await IngestAsync(new ProviderAddress(@namespace, name), version, request.Body));
 }

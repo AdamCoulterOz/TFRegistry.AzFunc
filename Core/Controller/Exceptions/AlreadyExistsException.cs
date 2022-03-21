@@ -5,6 +5,6 @@ namespace PurpleDepot.Core.Controller.Exceptions;
 public class AlreadyExistsException<T> : ItemException<T>
 	where T : RegistryItem<T>
 {
-	public AlreadyExistsException(Address<T> address, HttpRequestMessage requestMessage)
-		: base(address, requestMessage, HttpStatusCode.Conflict, "already exists") { }
+	public AlreadyExistsException(Address<T> address)
+		: base(address, HttpStatusCode.Conflict, "already exists") { }
 }

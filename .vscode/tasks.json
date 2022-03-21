@@ -9,6 +9,9 @@
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/Providers/Azure/DotNet"
+			},
 			"type": "process",
 			"problemMatcher": "$msCompile"
 		},
@@ -20,6 +23,9 @@
 				"/property:GenerateFullPaths=true",
 				"/consoleloggerparameters:NoSummary"
 			],
+			"options": {
+				"cwd": "${workspaceFolder}/Providers/Azure/DotNet"
+			},
 			"type": "process",
 			"dependsOn": "clean",
 			"group": {

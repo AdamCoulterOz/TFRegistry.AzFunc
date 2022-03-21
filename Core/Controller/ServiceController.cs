@@ -21,6 +21,6 @@ public class ServiceController
 		}
 	}
 
-	protected static async Task<HttpResponseMessage> ServiceDiscovery(HttpRequestMessage request)
-		=> await Task.Run(() => request.CreateJsonResponse(Services));
+	protected static async Task<ControllerResult> ServiceDiscovery()
+		=> await Task.Run(() => ControllerResult.NewJson(Services));
 }

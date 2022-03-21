@@ -19,3 +19,8 @@ resource "azurerm_storage_container" "registry" {
   storage_account_name  = azurerm_storage_account.repo.name
   container_access_type = "blob"
 }
+
+resource "azurerm_storage_container" "state" {
+  name                  = "state"
+  storage_account_name  = azurerm_storage_account.repo.name
+}

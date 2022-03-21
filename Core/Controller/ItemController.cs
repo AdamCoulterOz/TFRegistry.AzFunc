@@ -20,13 +20,13 @@ public class ItemController<T>
 		_storageProvider = storageProvider;
 	}
 
-	protected async Task<HttpResponseMessage> IngestAsync(HttpRequestMessage request, Address<T> newAddress,
+	protected async Task<ControllerResult> IngestAsync(Address<T> newAddress,
 		string version, Stream stream)
 	{
 		var item = await _itemRepo.GetItemAsync(newAddress);
 
 		if (item is not null && item.HasVersion(version))
-			throw new AlreadyExistsException<T>(item.Address, request);
+			throw new AlreadyExistsException<T>(item.Address);
 
 		if (item is null)
 		{
@@ -41,41 +41,41 @@ public class ItemController<T>
 		{
 			await _storageProvider.UploadZipAsync(item.GetFileKey(newVersion), stream);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
-			throw new HttpResponseException(request, HttpStatusCode.InternalServerError, $"Uploading file failed, and the module was not saved. Inner error: {e.Message}");
+			throw new HttpResponseException(HttpStatusCode.InternalServerError, $"Uploading file failed, and the module was not saved. Inner error: {e.Message}");
 		}
 
 		_itemRepo.SaveChanges();
-		return request.CreateResponse(HttpStatusCode.Created);
+		return ControllerResult.New(HttpStatusCode.Created);
 	}
 
-	protected async Task<HttpResponseMessage> DownloadAsync(HttpRequestMessage request, Address<T> itemId,
+	protected async Task<ControllerResult> DownloadAsync(Address<T> itemId,
 		string? versionName = null)
 	{
-		var (item, version) = await GetItemAsync(request, itemId, versionName);
+		var (item, version) = await GetItemAsync(itemId, versionName);
 		var fileKey = item.GetFileKey(version);
 
-		var response = request.CreateResponse(HttpStatusCode.NoContent);
+		var response = ControllerResult.New(HttpStatusCode.NoContent);
 		var downloadUri = _storageProvider.DownloadLink(fileKey);
 		var builder = new UriBuilder(downloadUri);
 		var query = HttpUtility.ParseQueryString(builder.Query);
 		query.Add("archive", "zip");
 		builder.Query = query.ToString();
-		response.Headers.Add("X-Terraform-Get", builder.ToString());
+		response.AddHeader("X-Terraform-Get", builder.ToString());
 		return response;
 	}
 
-	protected virtual async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, Address<T> itemId, string? versionName = null)
-		=> request.CreateJsonResponse(await GetItemAsync(request, itemId, versionName));
+	protected virtual async Task<ControllerResult> GetAsync(Address<T> itemId, string? versionName = null)
+		=> ControllerResult.NewJson((await GetItemAsync(itemId, versionName)).item);
 
-	protected async Task<(T item, RegistryItemVersion version)> GetItemAsync(HttpRequestMessage request,
+	protected async Task<(T item, RegistryItemVersion version)> GetItemAsync(
 		Address<T> itemId, string? versionName = null)
 	{
 		var item = await _itemRepo.GetItemAsync(itemId);
 		var version = item?.GetVersion(versionName);
 		if (item is null || version is null)
-			throw new NotFoundException<T>(itemId, request);
+			throw new NotFoundException<T>(itemId);
 		return (item, version);
 	}
 }
