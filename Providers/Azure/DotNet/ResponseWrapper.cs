@@ -28,7 +28,7 @@ public static class ResponseWrapper
 			var result = await controllerFunc();
 			return await result.AsResponseDataAsync(request);
 		}
-		catch (HttpResponseException re)
+		catch (ControllerResultException re)
 		{
 			return await re.Response.AsResponseDataAsync(request);
 		}

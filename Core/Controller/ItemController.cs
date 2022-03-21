@@ -43,7 +43,7 @@ public class ItemController<T>
 		}
 		catch (Exception e)
 		{
-			throw new HttpResponseException(HttpStatusCode.InternalServerError, $"Uploading file failed, and the module was not saved. Inner error: {e.Message}");
+			throw new ControllerResultException(HttpStatusCode.InternalServerError, $"Uploading file failed, and the module was not saved. Inner error: {e.Message}");
 		}
 
 		_itemRepo.SaveChanges();
