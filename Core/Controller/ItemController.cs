@@ -26,7 +26,7 @@ public class ItemController<T>
 		var item = await _itemRepo.GetItemAsync(newAddress);
 
 		if (item is not null && item.HasVersion(version))
-			throw new AlreadyExistsException<T>(item.Address);
+			throw new AlreadyExistsException<T>(newAddress);
 
 		if (item is null)
 		{

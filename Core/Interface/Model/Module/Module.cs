@@ -12,7 +12,7 @@ public class Module : RegistryItem<Module>
 	public List<ModuleVersion> Versions { get; }
 
 	[JsonIgnore]
-	public override ModuleAddress Address => GetAddress(Namespace, Name, Provider);
+	protected override ModuleAddress Address => GetAddress(Namespace, Name, Provider);
 
 	public override List<RegistryItemVersion> GetVersions() => Versions.ToList<RegistryItemVersion>();
 

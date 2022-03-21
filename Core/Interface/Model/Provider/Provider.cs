@@ -6,7 +6,7 @@ public class Provider : RegistryItem<Provider>
 	[JsonPropertyName("alias")]
 	public string? Alias { get; set; }
 
-	public override Address<Provider> Address => GetAddress(Namespace, Name);
+	protected override Address<Provider> Address => GetAddress(Namespace, Name);
 
 	public List<ProviderVersion> Versions { get; init; }
 	public override List<RegistryItemVersion> GetVersions() => Versions.ToList<RegistryItemVersion>();

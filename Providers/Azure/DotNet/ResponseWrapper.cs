@@ -13,7 +13,7 @@ public static class ResponseWrapper
 
 		var writeTask = result.Content switch
 		{
-			null => response.WriteStringAsync(string.Empty),
+			null => Task.CompletedTask,
 			string content => response.WriteStringAsync(content),
 			not null => response.WriteAsJsonAsync(result.Content).AsTask(),
 		};

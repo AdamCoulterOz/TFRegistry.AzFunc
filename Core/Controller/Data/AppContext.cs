@@ -56,7 +56,6 @@ public class AppContext : DbContext
 		modelBuilder.Entity<T>(rie =>
 		{
 			rie.HasBaseType<RegistryItem<T>>();
-			rie.Ignore(ri => ri.Address);
 			rie.Ignore(ri => ri.Version);
 
 			modelBuilder.Entity<RegistryItem<T>>(ribe =>
