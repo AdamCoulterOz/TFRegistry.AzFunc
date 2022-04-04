@@ -17,6 +17,7 @@ public abstract class RegistryItem<T>
 	public abstract List<RegistryItemVersion> GetVersions();
 
 	/// <summary>Latest version</summary>
+	[JsonPropertyName("version")]
 	public RegistryItemVersion Version => GetVersions().Max()!;
 
 	[JsonPropertyName("owner")]
