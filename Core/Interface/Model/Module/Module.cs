@@ -9,6 +9,7 @@ public class Module : RegistryItem<Module>
 	[JsonPropertyName("providers")]
 	public List<string> Providers { get; }
 
+	[JsonPropertyName("versions")]
 	public List<ModuleVersion> Versions { get; }
 
 	[JsonIgnore]

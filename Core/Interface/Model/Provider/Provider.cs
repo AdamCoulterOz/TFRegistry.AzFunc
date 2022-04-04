@@ -8,6 +8,7 @@ public class Provider : RegistryItem<Provider>
 
 	protected override Address<Provider> Address => GetAddress(Namespace, Name);
 
+	[JsonPropertyName("versions")]
 	public List<ProviderVersion> Versions { get; init; }
 	public override List<RegistryItemVersion> GetVersions() => Versions.ToList<RegistryItemVersion>();
 
