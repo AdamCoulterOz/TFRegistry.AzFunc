@@ -6,8 +6,8 @@ public class ModuleAddress : Address<Module>
 {
 	public string Provider { get; }
 
-	public ModuleAddress(string @namespace, string name, string provider) : base(@namespace, name)
-		=> Provider = provider;
+	public ModuleAddress(string @namespace, string name, string provider) : base(@namespace.ToLower(), name.ToLower())
+		=> Provider = provider.ToLower();
 
 	public override string ToString()
 		=> $"{base.ToString()}/{Provider}";

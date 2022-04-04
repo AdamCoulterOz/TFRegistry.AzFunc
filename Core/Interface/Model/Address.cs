@@ -6,7 +6,7 @@ public abstract class Address<T>
 	public string Namespace { get; }
 	public string Name { get; }
 	public Address(string @namespace, string name)
-		=> (Namespace, Name) = (@namespace, name);
+		=> (Namespace, Name) = (@namespace.ToLower(), name.ToLower());
 
 	public override string ToString()
 		=> $"{Namespace}/{Name}";

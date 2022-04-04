@@ -4,7 +4,7 @@ namespace PurpleDepot.Core.Interface.Model.Provider;
 public class ProviderAddress : Address<Provider>
 {
 	public ProviderAddress(string @namespace, string name)
-		: base(@namespace, name) { }
+		: base(@namespace.ToLower(), name.ToLower()) { }
 
 	protected ProviderAddress() { }
 
