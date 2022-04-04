@@ -41,6 +41,8 @@ public class Provider : RegistryItem<Provider>
 	protected override ProviderVersion AddSpecificVersion(string version)
 		=> AddSpecificVersion(new ProviderVersion(version));
 
+	protected override string GetTypeName() => "providers";
+
 #nullable disable
 	protected Provider()
 	{ }

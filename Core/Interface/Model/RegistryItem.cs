@@ -77,6 +77,8 @@ public abstract class RegistryItem<T>
 		return AddSpecificVersion(version);
 	}
 
+	protected abstract string GetTypeName();
+
 	protected abstract RegistryItemVersion AddSpecificVersion(RegistryItemVersion version);
 	protected abstract RegistryItemVersion AddSpecificVersion(string version);
 
@@ -84,7 +86,7 @@ public abstract class RegistryItem<T>
 	{
 		if (version is null)
 			version = Version;
-		return $"{Address}/{version.Key}-{version.Version}.zip";
+		return $"{GetTypeName()}/{Address}/{version.Key}-{version.Version}.zip";
 	}
 
 #nullable disable

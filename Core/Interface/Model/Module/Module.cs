@@ -35,6 +35,8 @@ public class Module : RegistryItem<Module>
 	protected override ModuleVersion AddSpecificVersion(string version)
 		=> AddSpecificVersion(new ModuleVersion(version));
 
+	protected override string GetTypeName() => "modules";
+
 	protected Module(ModuleAddress id, string version)
 	: base(id)
 	{
