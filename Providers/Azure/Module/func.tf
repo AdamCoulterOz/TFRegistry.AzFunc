@@ -35,7 +35,6 @@ resource "azurerm_linux_function_app" "app" {
   service_plan_id               = azurerm_service_plan.app_plan.id
   storage_uses_managed_identity = true
   https_only                    = true
-  functions_extension_version   = "~4"
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME          = "dotnet-isolated"
     PurpleDepot__Storage__Account     = azurerm_storage_account.repo.name
