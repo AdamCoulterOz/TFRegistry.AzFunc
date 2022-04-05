@@ -16,7 +16,7 @@ public class ServiceController
 		{
 			Services.Add(
 				service.GetStaticProperty<string>(nameof(IRoutes.RootName))!,
-				service.GetStaticProperty<string>(nameof(IRoutes.RootPath))!
+				$"/{service.GetStaticProperty<string>(nameof(IRoutes.RootPath))!}/"
 			);
 		}
 	}
